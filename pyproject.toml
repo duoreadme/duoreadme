@@ -1,0 +1,167 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "duoreadme"
+dynamic = ["version"]
+description = "一个强大的CLI工具，用于将项目代码和README自动翻译成多种语言并生成规范化的多语言文档"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "DuoReadme Team", email = "team@duoreadme.com"}
+]
+maintainers = [
+    {name = "DuoReadme Team", email = "team@duoreadme.com"}
+]
+keywords = ["readme", "translation", "multilingual", "documentation", "cli"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Documentation",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Text Processing :: Linguistic",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "bidict>=0.23.1",
+    "certifi>=2024.2.2",
+    "charset-normalizer>=3.3.2",
+    "h11>=0.14.0",
+    "netifaces>=0.10.6",
+    "python-engineio>=4.9.0",
+    "python-socketio>=5.11.4",
+    "requests>=2.31.0",
+    "simple-websocket>=1.0.0",
+    "socketio>=0.2.1",
+    "sseclient-py>=1.8.0",
+    "tencentcloud-sdk-python>=3.0.1224",
+    "websocket-client>=1.8.0",
+    "websockets>=13.0.1",
+    "wsproto>=1.2.0",
+    "PyYAML>=6.0",
+    "click>=8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov>=2.0",
+    "black>=21.0",
+    "flake8>=3.8",
+    "mypy>=0.800",
+    "pre-commit>=2.0",
+]
+cli = [
+    "click>=8.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-username/duoreadme"
+Documentation = "https://github.com/your-username/duoreadme/wiki"
+Repository = "https://github.com/your-username/duoreadme.git"
+"Bug Tracker" = "https://github.com/your-username/duoreadme/issues"
+"Source Code" = "https://github.com/your-username/duoreadme"
+
+[project.scripts]
+duoreadme = "src.cli.main:main"
+
+[tool.setuptools]
+packages = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["*.md", "*.txt", "*.yaml", "*.yml"]
+
+[tool.setuptools_scm]
+write_to = "src/_version.py"
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["src"]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "tencentcloud.*",
+    "sseclient.*",
+    "requests.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --strict-markers --strict-config"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/env/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+] 

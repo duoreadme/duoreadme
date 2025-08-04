@@ -13,3 +13,5 @@ tencentcloud-sdk-python==3.0.1224
 websocket-client==1.8.0
 websockets==13.0.1
 wsproto==1.2.0
+PyYAML>=6.0
+click>=8.0

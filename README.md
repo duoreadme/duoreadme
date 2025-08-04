@@ -1,199 +1,237 @@
-# 多语言 README 生成工具 CLI 使用指南
+# DuoReadme - 多语言 README 生成工具
 
-## 概述
+一个强大的CLI工具，用于将项目代码和README自动翻译成多种语言并生成规范化的多语言文档。
 
-这个项目提供了多个 CLI 工具来将项目代码和 README 翻译成多种语言并保存到 docs 目录。
+## 🚀 功能特性
 
-## 可用的 CLI 工具
+- **多语言支持**: 支持10种主流语言（中文、英文、日文、韩文、法文、德文、西班牙文、意大利文、葡萄牙文、俄文）
+- **智能解析**: 自动解析项目结构和代码内容
+- **批量处理**: 一键生成所有语言的README文档
+- **腾讯云集成**: 集成腾讯云翻译服务
+- **灵活配置**: 支持自定义项目路径和语言选择
 
-### 1. 一键运行脚本
+## 📁 项目结构
 
-最简单的使用方式，一键完成所有流程：
-
-```bash
-python run_translation.py
+```
+duoreadme/
+├── README.md                 # 项目主文档
+├── requirements.txt          # Python依赖包
+├── setup.py                 # 安装配置
+├── pyproject.toml           # 项目配置
+├── .gitignore              # Git忽略文件
+├── docs/                   # 生成的文档目录
+├── src/                    # 源代码目录
+│   ├── __init__.py
+│   ├── core/               # 核心功能模块
+│   │   ├── __init__.py
+│   │   ├── translator.py   # 翻译核心逻辑
+│   │   ├── parser.py       # 内容解析器
+│   │   └── generator.py    # 文档生成器
+│   ├── cli/                # CLI工具模块
+│   │   ├── __init__.py
+│   │   ├── main.py         # 主CLI入口
+│   │   └── commands.py     # CLI命令
+│   ├── services/           # 外部服务集成
+│   │   ├── __init__.py
+│   │   ├── tencent_cloud.py # 腾讯云服务
+│   │   └── sse_client.py   # SSE客户端
+│   ├── utils/              # 工具函数
+│   │   ├── __init__.py
+│   │   ├── file_utils.py   # 文件操作工具
+│   │   └── config.py       # 配置管理
+│   └── models/             # 数据模型
+│       ├── __init__.py
+│       └── types.py        # 类型定义
+├── tests/                  # 测试目录
+│   ├── __init__.py
+│   ├── test_translator.py
+│   ├── test_parser.py
+│   └── test_cli.py
+├── examples/               # 示例目录
+│   ├── sample_project/     # 示例项目
+│   └── usage_examples.py   # 使用示例
+└── scripts/                # 脚本目录
+    ├── install.sh          # 安装脚本
+    └── run_tests.sh        # 测试脚本
 ```
 
-这个脚本会自动执行：
-- 翻译项目内容
-- 解析多语言 README
-- 生成总结报告
-
-### 2. 简化版 CLI
+## 🛠️ 安装
 
 ```bash
-python simple_cli.py
+# 克隆项目
+git clone https://github.com/your-username/duoreadme.git
+cd duoreadme
+
+# 安装依赖
+pip install -r requirements.txt
+
+# 安装项目
+pip install -e .
 ```
 
-功能：
-- 读取 project 目录下的文件
-- 调用翻译脚本
-- 显示生成的文件列表
+## 📖 使用方法
 
-帮助信息：
-```bash
-python simple_cli.py --help
-```
-
-### 3. 完整版 CLI (功能最全)
+### 基本使用
 
 ```bash
-python cli.py
-```
+# 查看所有可用命令
+python -m src.cli.main --help
 
-支持的命令行参数：
-```bash
-# 使用默认设置
-python cli.py
+# 翻译项目并生成多语言README（自动应用 .gitignore 过滤）
+python -m src.cli.main translate
 
-# 指定项目路径
-python cli.py --project-path ./myproject
+# 指定项目路径翻译
+python -m src.cli.main translate --project-path ./myproject
 
 # 指定要翻译的语言
-python cli.py --languages 中文 English 日本語
+python -m src.cli.main translate --languages "zh,en,ja"
+```
+
+### 可用命令
+
+#### translate - 翻译项目
+```bash
+# 使用默认设置翻译项目
+python -m src.cli.main translate
+
+# 指定项目路径
+python -m src.cli.main translate --project-path ./myproject
+
+# 指定要翻译的语言
+python -m src.cli.main translate --languages "zh,en,ja"
+
+# 指定输出目录
+python -m src.cli.main translate --output-dir ./my_docs
 
 # 不保存原始响应
-python cli.py --no-save-raw
+python -m src.cli.main translate --no-save-raw
 
-# 显示版本信息
-python cli.py --version
+# 显示详细输出
+python -m src.cli.main translate --verbose
 ```
 
-### 4. 单独运行各个脚本
+**📝 关于 .gitignore 支持**
 
-如果需要单独运行某个步骤：
+翻译器会自动检测项目根目录下的 `.gitignore` 文件，并过滤掉被忽略的文件和目录。这确保只翻译项目中真正重要的源代码文件，避免处理临时文件、构建产物、依赖包等。
+
+- ✅ 如果项目有 `.gitignore` 文件，会自动应用过滤规则
+- ✅ 如果没有 `.gitignore` 文件，会读取所有文本文件
+- ✅ 支持标准的 `.gitignore` 语法（通配符、目录模式等）
+- ✅ 优先读取 `README.md` 文件，然后读取其他源代码文件
+
+
+
+#### config - 显示配置信息
+```bash
+# 显示当前配置
+python -m src.cli.main config
+
+# 显示指定配置文件
+python -m src.cli.main config --config ./my_config.yaml
+```
+
+#### list - 列出已生成的文件
+```bash
+# 列出默认输出目录的文件
+python -m src.cli.main list
+
+# 列出指定输出目录的文件
+python -m src.cli.main list --output-dir ./my_docs
+```
+
+### 全局选项
 
 ```bash
-# 只运行翻译
-python translate_readme.py
+# 显示版本信息
+python -m src.cli.main --version
 
-# 只运行解析
-python parse_translation.py
-
-# 只运行总结
-python summary.py
+# 显示帮助信息
+python -m src.cli.main --help
 ```
 
-## 生成的文件
+### 编程接口
 
-运行完成后，会在 `docs` 目录下生成以下文件：
+```python
+from src.core.translator import Translator
+from src.core.parser import Parser
 
-- `README.en.md` - English 版本
-- `README.zh.md` - 中文版本
-- `README.th.md` - 泰语版本
-- `README_translation_response.txt` - 原始翻译响应
+# 创建翻译器
+translator = Translator()
 
-## 支持的语言
+# 翻译项目内容
+result = translator.translate_project("./sample_project")
 
-默认支持以下语言：
-- 中文 (Chinese)
-- English
-- 日本語 (Japanese)
-- 한국어 (Korean)
-- Français (French)
-- Deutsch (German)
-- Español (Spanish)
-- Italiano (Italian)
-- Português (Portuguese)
-- Русский (Russian)
-
-## 项目结构要求
-
-工具期望的项目结构：
+# 解析多语言内容
+parser = Parser()
+readme_dict = parser.parse_multilingual_content(result)
 ```
-project/
+
+## 🔧 配置
+
+### 环境变量
+
+```bash
+# 腾讯云配置
+export TENCENTCLOUD_SECRET_ID="your_secret_id"
+export TENCENTCLOUD_SECRET_KEY="your_secret_key"
+# 应用配置
+export DUOREADME_BOT_APP_KEY="your_bot_app_key"
+```
+
+### 配置文件
+
+创建 `config.yaml` 文件：
+
+```yaml
+# 腾讯云配置
+tencent_cloud:
+  secret_id: "your_secret_id"
+  secret_key: "your_secret_key"
+  region: "ap-beijing"
+
+# 翻译配置
+translation:
+  default_languages:
+    - "中文"
+    - "English"
+    - "日本語"
+  batch_size: 5
+  timeout: 30
+
+
+```
+
+## 🧪 测试
+
+```bash
+# 运行所有测试
+python -m pytest tests/
+
+# 运行特定测试
+python -m pytest tests/test_translator.py
+```
+
+## 📝 示例
+
+### 示例项目结构
+
+```
+sample_project/
 ├── README.md
 └── src/
-    ├── compile.ts
-    └── 其他文件...
+    ├── main.py
+    └── utils.py
 ```
 
-## 环境要求
-
-1. Python 3.6+
-2. 安装依赖包：
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-## 故障排除
-
-### 1. distutils 错误
-
-如果遇到 `_distutils_hack` 模块错误，可以尝试：
+### 运行示例
 
 ```bash
-# 方法1: 使用简化版 CLI
-python simple_cli.py
+# 翻译示例项目
+python -m src.cli.main translate --project-path examples/sample_project
 
-# 方法2: 单独运行脚本
-python translate_readme.py
-python parse_translation.py
-python summary.py
+# 查看生成的文件
+ls docs/
+# README.zh.md
+# README.en.md
+# README.ja.md
 ```
-
-### 2. 依赖包缺失
-
-如果缺少依赖包：
-```bash
-pip install -r requirements.txt
-```
-
-### 3. 项目文件不存在
-
-确保 `project` 目录存在且包含 `README.md` 和 `src` 目录。
-
-## 示例输出
-
-成功运行后的输出示例：
-```
-🚀 多语言 README 生成工具
-==================================================
-📖 步骤 1: 运行翻译脚本
-✓ 已读取 project/README.md
-✓ 已读取 project/src/compile.ts
-项目内容读取完成
-✓ 创建 docs 目录
-正在发送翻译请求...
-✅ 翻译完成
-正在解析多语言 README...
-未能解析到多语言 README 内容
-已保存原始响应到 docs/README_translation_response.txt
-
-🔍 步骤 2: 运行解析脚本
-开始解析翻译响应...
-找到 English 版本
-找到 中文 版本
-找到 ไทย 版本
-已保存 English README 到 docs/README.en.md
-已保存 中文 README 到 docs/README.zh.md
-已保存 ไทย README 到 docs/README.th.md
-成功解析并保存了 3 种语言的 README
-
-📊 步骤 3: 运行总结脚本
-============================================================
-项目翻译和解析完成总结
-============================================================
-✓ docs 目录已创建
-生成的文件:
-  - README.en.md (1390 bytes)
-  - README.th.md (2949 bytes)
-  - README.zh.md (1283 bytes)
-  - README_translation_response.txt (5698 bytes)
-✓ 成功生成了 3 种语言的 README:
-  - English
-  - ไทย (泰语)
-  - 中文
-============================================================
-任务完成！
-============================================================
-
-🎉 所有任务完成！
-```
-
-## 注意事项
-
-1. 翻译过程需要网络连接
-2. 翻译质量取决于 AI 服务的响应
-3. 建议在翻译完成后检查生成的文件内容
-4. 如果解析失败，可以手动查看 `README_translation_response.txt` 文件 
