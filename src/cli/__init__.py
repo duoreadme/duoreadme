@@ -5,6 +5,6 @@ CLI工具模块
 """
 
 from .main import main, cli
-from .commands import translate_command, config_command
+from .commands import gen_command, config_command
 
-__all__ = ["main", "cli", "translate_command", "config_command"] 
+__all__ = ["main", "cli", "gen_command", "config_command"] 

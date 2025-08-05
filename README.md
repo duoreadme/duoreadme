@@ -25,20 +25,37 @@ pip install -r requirements.txt
 ### 基本使用
 
 ```bash
-# 默认翻译当前目录
-python -m src.cli.main
+# 查看所有可用命令
+python -m src.cli.main --help
 
-# 指定项目路径
-python -m src.cli.main --project-path ./myproject
+# 生成多语言README（自动应用 .gitignore 过滤）
+python -m src.cli.main gen
+
+# 指定项目路径生成
+python -m src.cli.main gen --project-path ./myproject
 
 # 指定要翻译的语言
-python -m src.cli.main --languages "zh,en,ja"
+python -m src.cli.main gen --languages "zh,en,ja"
+```
 
-# 启用调试模式
-python -m src.cli.main --debug
+### 可用命令
+
+#### gen - 生成多语言README
+```bash
+# 使用默认设置生成多语言README
+python -m src.cli.main gen
+
+# 指定项目路径
+python -m src.cli.main gen --project-path ./myproject
+
+# 指定要翻译的语言
+python -m src.cli.main gen --languages "zh,en,ja"
 
 # 显示详细输出
-python -m src.cli.main --verbose
+python -m src.cli.main gen --verbose
+
+# 启用调试模式（显示详细日志）
+python -m src.cli.main gen --debug
 ```
 
 **📝 关于 .gitignore 支持**
@@ -115,17 +132,17 @@ DuoReadme 采用智能的项目内容读取策略，确保翻译的内容既全�
 
 #### config - 显示配置信息
 ```bash
-# 查看当前配置
-python -m src.cli.config_cli
+# 显示当前配置
+python -m src.cli.main config
 
-# 指定配置文件
-python -m src.cli.config_cli --config ./my_config.yaml
+# 显示指定配置文件
+python -m src.cli.main config --config ./my_config.yaml
 
-# 启用调试模式
-python -m src.cli.config_cli --debug
+# 启用调试模式查看详细配置信息
+python -m src.cli.main config --debug
 ```
 
-### 帮助信息
+### 全局选项
 
 ```bash
 # 显示版本信息
@@ -166,43 +183,35 @@ export DUOREADME_BOT_APP_KEY="your_bot_app_key"
 
 ### 配置文件
 
-复制示例配置文件并填入您的配置：
-
-```bash
-cp config.yaml.example config.yaml
-nano config.yaml
-```
-
-配置文件示例：
+创建 `config.yaml` 文件：
 
 ```yaml
-app:
-  bot_app_key: "your_bot_app_key_here"
-  visitor_biz_id: "your_visitor_biz_id_here"
-
+# 腾讯云配置
 tencent_cloud:
-  secret_id: "your_secret_id_here"
-  secret_key: "your_secret_key_here"
+  secret_id: "your_secret_id"
+  secret_key: "your_secret_key"
   region: "ap-beijing"
-  service: "lke"
-  api_version: "2023-11-30"
 
+# 翻译配置
 translation:
   default_languages:
-    - "中文"
-    - "English"
-    - "日本語"
+    - "zh"
+    - "en"
+    - "ja"
   batch_size: 5
   timeout: 30
 
-sse:
-  streaming_throttle: 1
-  timeout: 60
+# 日志配置
+logging:
+  default_level: "INFO"  # 默认日志级别
+  debug_mode: false      # 是否启用调试模式
 ```
 
 ## 日志
 
 DuoReadme 提供了完整的日志系统，帮助您了解翻译过程的详细情况：
+
+### 日志级别
 
 - **DEBUG**: 详细的调试信息（仅在调试模式下显示）
 - **INFO**: 一般信息（默认显示）
@@ -210,15 +219,27 @@ DuoReadme 提供了完整的日志系统，帮助您了解翻译过程的详细�
 - **ERROR**: 错误信息
 - **CRITICAL**: 严重错误信息
 
-### 日志用法
+### 使用方式
 
+#### 默认模式
 ```bash
-# 默认只显示 INFO 及以上日志
-python -m src.cli.main
-
-# 显示所有级别日志（调试模式）
-python -m src.cli.main --debug
+# 只显示 INFO 及以上级别的日志
+python -m src.cli.main gen
 ```
+
+#### 调试模式
+```bash
+# 显示所有级别的日志，包括详细的调试信息
+python -m src.cli.main gen --debug
+```
+
+### 调试信息包括
+- 配置文件加载过程
+- 文件扫描和过滤详情
+- 翻译请求的详细信息
+- 内容压缩和分批处理过程
+- 文件生成和保存步骤
+- 错误和异常的详细信息
 
 ## 测试
 

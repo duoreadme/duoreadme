@@ -19,8 +19,8 @@ from ..utils.logger import enable_debug, info, debug
 @click.option('--config', help='配置文件路径')
 @click.option('--verbose', is_flag=True, help='显示详细输出')
 @click.option('--debug', 'debug_mode', is_flag=True, help='启用调试模式，输出 DEBUG 级别日志')
-def translate_command(project_path, languages, config, verbose, debug_mode):
-    """翻译项目并生成多语言README"""
+def gen_command(project_path, languages, config, verbose, debug_mode):
+    """生成多语言README"""
     try:
         # 根据 --debug 参数设置日志级别
         if debug_mode:
