@@ -4,7 +4,7 @@ DuoReadme 是一个强大的 CLI 工具，用于将项目代码和 README 自动
 
 ## 功能特性
 
-- **多语言支持**: 支持多种主流语言（100+）详细配置项请见[ISO Language Codes](./LANGUAGE.md)。
+- **多语言支持**: 支持100+种语言，包括中文、英文、日文、韩文、法文、德文、西班牙文、意大利文、葡萄牙文、俄文等，完整语言列表请见[ISO Language Codes](./LANGUAGE.md)。
 - **智能解析**: 自动解析项目结构和代码内容
 - **批量处理**: 一键生成所有语言的 README 文档
 - **腾讯云集成**: 集成腾讯云智能体平台
@@ -35,7 +35,7 @@ python -m src.cli.main gen
 python -m src.cli.main gen --project-path ./myproject
 
 # 指定要翻译的语言
-python -m src.cli.main gen --languages "zh,en,ja"
+python -m src.cli.main gen --languages "zh-Hans,en,ja,ko,fr"
 ```
 
 ### 可用命令
@@ -49,7 +49,7 @@ python -m src.cli.main gen
 python -m src.cli.main gen --project-path ./myproject
 
 # 指定要翻译的语言
-python -m src.cli.main gen --languages "zh,en,ja"
+python -m src.cli.main gen --languages "zh-Hans,en,ja,ko,fr"
 
 # 显示详细输出
 python -m src.cli.main gen --verbose
@@ -195,9 +195,18 @@ tencent_cloud:
 # 翻译配置
 translation:
   default_languages:
-    - "zh"
-    - "en"
-    - "ja"
+    # 常用语言（推荐）
+    - "zh-Hans"    # 中文 (简体)
+    - "en"         # English
+    - "ja"         # 日本語
+    - "ko"         # 한국어
+    - "fr"         # Français
+    - "de"         # Deutsch
+    - "es"         # Español
+    - "it"         # Italiano
+    - "pt"         # Português (Brasil)
+    - "ru"         # Русский
+    # 完整语言列表请参考 LANGUAGE.md
   batch_size: 5
   timeout: 30
 

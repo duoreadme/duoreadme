@@ -17,16 +17,30 @@ tencent_cloud:
 # 翻译配置
 translation:
   default_languages:
-    - "zh"
-    - "en"
-    - "ja"
-    # - "ko"
-    # - "fr"
-    # - "de"
-    # - "es"
-    # - "it"
-    # - "pt"
-    # - "ru"
+    # 常用语言（推荐）
+    - "zh-Hans"    # 中文 (简体)
+    - "en"         # English
+    - "ja"         # 日本語
+    - "ko"         # 한국어
+    - "fr"         # Français
+    - "de"         # Deutsch
+    - "es"         # Español
+    - "it"         # Italiano
+    - "pt"         # Português (Brasil)
+    - "ru"         # Русский
+    
+    # 其他语言（可选）
+    # - "af"        # Afrikaans
+    # - "ar"        # العربية
+    # - "hi"        # हिन्दी
+    # - "th"        # ไทย
+    # - "vi"        # Tiếng Việt
+    # - "tr"        # Türkçe
+    # - "pl"        # Polski
+    # - "nl"        # Nederlands
+    # - "sv"        # Svenska
+    # - "da"        # Dansk
+    # 完整语言列表请参考 LANGUAGE.md
   batch_size: 5
   timeout: 30
 
