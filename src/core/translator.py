@@ -486,7 +486,7 @@ class Translator:
         # 构建简洁的prompt
         prompt = f"""翻译项目为{languages_str}README，格式：
 
-项目：{content[:1000]}{'...' if len(content) > 1000 else ''}
+项目：{content}
 
 要求：每种语言生成完整README，包含介绍、功能、使用方法。
 
@@ -528,7 +528,6 @@ class Translator:
         try:
             # 使用SSE客户端发送请求
             response_text = self.sse_client.send_request(request)
-            print("✅ 翻译完成")
             
             return TranslationResponse(
                 success=True,

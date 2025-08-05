@@ -43,7 +43,6 @@ def translate_command(project_path, languages, config, verbose, debug_mode):
         debug("核心组件初始化完成")
         
         # 显示开始信息
-        click.echo("🚀 多语言 README 生成工具")
         click.echo("=" * 50)
         
         # 处理语言参数
@@ -62,7 +61,7 @@ def translate_command(project_path, languages, config, verbose, debug_mode):
             verbose=verbose
         )
         
-        click.echo("\n🎉 所有任务完成！")
+        click.echo("\n所有任务完成！")
         
     except Exception as e:
         click.echo(f"❌ 执行失败: {e}", err=True)
@@ -80,7 +79,6 @@ def run_translation_workflow(
     verbose: bool = False
 ):
     """执行翻译工作流程"""
-    click.echo("📖 步骤 1: 运行翻译脚本")
     debug(f"开始翻译项目: {project_path}")
     
     # 翻译项目内容
@@ -91,7 +89,6 @@ def run_translation_workflow(
         debug(f"翻译失败详情: {translation_response.error}")
         return
     
-    click.echo("✅ 翻译完成")
     debug("翻译响应处理完成")
     
     # 解析多语言README
@@ -102,7 +99,7 @@ def run_translation_workflow(
     debug("多语言内容解析完成")
     
     # 生成README文件
-    click.echo("\n🔍 步骤 2: 生成README文件")
+    click.echo("\n正在生成README文件")
     generation_result = generator.generate_readme_files(
         parsed_readme, 
         translation_response.raw_response
@@ -110,7 +107,6 @@ def run_translation_workflow(
     debug("README文件生成完成")
     
     # 生成总结报告
-    click.echo("\n📊 步骤 3: 生成总结报告")
     summary = generator.generate_summary(generation_result)
     click.echo(summary)
     debug("总结报告生成完成")
@@ -149,9 +145,3 @@ def config_command(config, debug_mode):
         if debug_mode:
             import traceback
             traceback.print_exc()
-
-
-
-
-
- 

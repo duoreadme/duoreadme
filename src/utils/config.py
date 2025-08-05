@@ -18,13 +18,22 @@ class Config:
         初始化配置管理器
         
         Args:
-            config_file: 配置文件路径，如果为None则使用默认配置
+            config_file: 配置文件路径，如果为None则尝试加载默认配置文件
         """
         self.config_file = config_file
         self._config = self._load_default_config()
         
+        # 加载配置文件
         if config_file and Path(config_file).exists():
             self._load_config_file(config_file)
+        else:
+            # 如果没有指定配置文件，尝试加载默认的配置文件
+            default_config_files = ["config.yaml", "config.yml", ".config.yaml"]
+            for default_file in default_config_files:
+                if Path(default_file).exists():
+                    self._load_config_file(default_file)
+                    self.config_file = default_file
+                    break
         
         # 从环境变量加载配置
         self._load_from_env()
@@ -33,8 +42,8 @@ class Config:
         """加载默认配置"""
         return {
             "app": {
-                "bot_app_key": "iIuhxDngAPmYRviQivBhDWVjxupvbeahuYivbmljFcNIyfHRcJdqLjjFTqYjwkBsuyhQMICCAbuEIfKzbhRelPxPZroXYEHzVoHpnuwcPnxErHdmzPGSUDCIiwkVtPkc",
-                "visitor_biz_id": "202403130001"
+                "bot_app_key": "",
+                "visitor_biz_id": ""
             },
             "tencent_cloud": {
                 "secret_id": "",
@@ -51,7 +60,6 @@ class Config:
                 "batch_size": 5,
                 "timeout": 30
             },
-
             "sse": {
                 "streaming_throttle": 1,
                 "timeout": 60
@@ -191,12 +199,20 @@ class Config:
         """
         required_keys = [
             "app.bot_app_key",
-            "app.visitor_biz_id"
+            # "app.visitor_biz_id"
         ]
         
+        missing_keys = []
         for key in required_keys:
-            if not self.get(key):
-                print(f"错误: 缺少必需的配置项 {key}")
-                return False
+            value = self.get(key)
+            if not value or value.startswith("your_") or value == "":
+                missing_keys.append(key)
+        
+        if missing_keys:
+            print("错误: 以下必需的配置项未正确设置:")
+            for key in missing_keys:
+                print(f"  - {key}")
+            print("\n请编辑 config.yaml 文件并填入正确的配置值。")
+            return False
         
         return True 

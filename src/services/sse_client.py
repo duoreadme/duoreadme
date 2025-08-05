@@ -84,7 +84,7 @@ class SSEClient:
         
         # 添加工作流变量（如果存在）
         if "workflow_variables" in req_data:
-            request_data["workflow_variables"] = req_data["workflow_variables"]
+            request_data["custom_variables"] = req_data["workflow_variables"]
         
         headers = {"Accept": "text/event-stream"}
         
@@ -125,8 +125,8 @@ class SSEClient:
                         elif data["payload"]["is_final"]:
                             # 最后一个事件使用 INFO 级别
                             info(f"收到事件: {event.event}")
-                            info(f"事件数据: {event.data}")
-                            info("翻译完成")
+                            debug(f"事件数据: {event.data}")
+                            info("润色完成")
                             response_text = data["payload"]["content"]
                             break
                         else:
