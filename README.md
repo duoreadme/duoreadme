@@ -1,12 +1,12 @@
 # DuoReadme - 多语言 README 生成工具
 
-一个强大的CLI工具，用于将项目代码和README自动翻译成多种语言并生成规范化的多语言文档。
+DuoReadme 是一个强大的 CLI 工具，用于将项目代码和 README 自动翻译成多种语言并生成规范化的多语言文档。
 
 ## 功能特性
 
 - **多语言支持**: 支持多种主流语言（100+），详细请见[ISO Language Codes](./LANGUAGE.md)。
 - **智能解析**: 自动解析项目结构和代码内容
-- **批量处理**: 一键生成所有语言的README文档
+- **批量处理**: 一键生成所有语言的 README 文档
 - **腾讯云集成**: 集成腾讯云智能体平台
 - **规范配置**: 采用通用项目规范，英文 README.md 放置在文件根目录下，其他语言的 README.md 放置在 docs 目录下。
 
@@ -25,47 +25,30 @@ pip install -r requirements.txt
 ### 基本使用
 
 ```bash
-# 查看所有可用命令
-python -m src.cli.main --help
-
-# 翻译项目并生成多语言README（自动应用 .gitignore 过滤）
-python -m src.cli.main translate
-
-# 指定项目路径翻译
-python -m src.cli.main translate --project-path ./myproject
-
-# 指定要翻译的语言
-python -m src.cli.main translate --languages "zh,en,ja"
-```
-
-### 可用命令
-
-#### translate - 翻译项目
-```bash
-# 使用默认设置翻译项目
-python -m src.cli.main translate
+# 默认翻译当前目录
+python -m src.cli.main
 
 # 指定项目路径
-python -m src.cli.main translate --project-path ./myproject
+python -m src.cli.main --project-path ./myproject
 
 # 指定要翻译的语言
-python -m src.cli.main translate --languages "zh,en,ja"
+python -m src.cli.main --languages "zh,en,ja"
+
+# 启用调试模式
+python -m src.cli.main --debug
 
 # 显示详细输出
-python -m src.cli.main translate --verbose
-
-# 启用调试模式（显示详细日志）
-python -m src.cli.main translate --debug
+python -m src.cli.main --verbose
 ```
 
 **📝 关于 .gitignore 支持**
 
 翻译器会自动检测项目根目录下的 `.gitignore` 文件，并过滤掉被忽略的文件和目录。这确保只翻译项目中真正重要的源代码文件，避免处理临时文件、构建产物、依赖包等。
 
-- ✅ 如果项目有 `.gitignore` 文件，会自动应用过滤规则
-- ✅ 如果没有 `.gitignore` 文件，会读取所有文本文件
-- ✅ 支持标准的 `.gitignore` 语法（通配符、目录模式等）
-- ✅ 优先读取 `README.md` 文件，然后读取其他源代码文件
+- 如果项目有 `.gitignore` 文件，会自动应用过滤规则
+- 如果没有 `.gitignore` 文件，会读取所有文本文件
+- 支持标准的 `.gitignore` 语法（通配符、目录模式等）
+- 优先读取 `README.md` 文件，然后读取其他源代码文件
 
 **🔍 代码读取整体逻辑**
 
@@ -132,19 +115,17 @@ DuoReadme 采用智能的项目内容读取策略，确保翻译的内容既全�
 
 #### config - 显示配置信息
 ```bash
-# 显示当前配置
-python -m src.cli.main config
+# 查看当前配置
+python -m src.cli.config_cli
 
-# 显示指定配置文件
-python -m src.cli.main config --config ./my_config.yaml
+# 指定配置文件
+python -m src.cli.config_cli --config ./my_config.yaml
 
-# 启用调试模式查看详细配置信息
-python -m src.cli.main config --debug
+# 启用调试模式
+python -m src.cli.config_cli --debug
 ```
 
-
-
-### 全局选项
+### 帮助信息
 
 ```bash
 # 显示版本信息
@@ -185,16 +166,27 @@ export DUOREADME_BOT_APP_KEY="your_bot_app_key"
 
 ### 配置文件
 
-创建 `config.yaml` 文件：
+复制示例配置文件并填入您的配置：
+
+```bash
+cp config.yaml.example config.yaml
+nano config.yaml
+```
+
+配置文件示例：
 
 ```yaml
-# 腾讯云配置
-tencent_cloud:
-  secret_id: "your_secret_id"
-  secret_key: "your_secret_key"
-  region: "ap-beijing"
+app:
+  bot_app_key: "your_bot_app_key_here"
+  visitor_biz_id: "your_visitor_biz_id_here"
 
-# 翻译配置
+tencent_cloud:
+  secret_id: "your_secret_id_here"
+  secret_key: "your_secret_key_here"
+  region: "ap-beijing"
+  service: "lke"
+  api_version: "2023-11-30"
+
 translation:
   default_languages:
     - "中文"
@@ -203,19 +195,14 @@ translation:
   batch_size: 5
   timeout: 30
 
-# 日志配置
-logging:
-  default_level: "INFO"  # 默认日志级别
-  debug_mode: false      # 是否启用调试模式
-
-
+sse:
+  streaming_throttle: 1
+  timeout: 60
 ```
 
 ## 日志
 
 DuoReadme 提供了完整的日志系统，帮助您了解翻译过程的详细情况：
-
-### 日志级别
 
 - **DEBUG**: 详细的调试信息（仅在调试模式下显示）
 - **INFO**: 一般信息（默认显示）
@@ -223,27 +210,15 @@ DuoReadme 提供了完整的日志系统，帮助您了解翻译过程的详细�
 - **ERROR**: 错误信息
 - **CRITICAL**: 严重错误信息
 
-### 使用方式
+### 日志用法
 
-#### 默认模式
 ```bash
-# 只显示 INFO 及以上级别的日志
-python -m src.cli.main translate
-```
+# 默认只显示 INFO 及以上日志
+python -m src.cli.main
 
-#### 调试模式
-```bash
-# 显示所有级别的日志，包括详细的调试信息
-python -m src.cli.main translate --debug
+# 显示所有级别日志（调试模式）
+python -m src.cli.main --debug
 ```
-
-### 调试信息包括
-- 配置文件加载过程
-- 文件扫描和过滤详情
-- 翻译请求的详细信息
-- 内容压缩和分批处理过程
-- 文件生成和保存步骤
-- 错误和异常的详细信息
 
 ## 测试
 
