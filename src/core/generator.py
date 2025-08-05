@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from ..utils.file_utils import FileUtils
 from ..models.types import ParsedReadme, GenerationResult
+from ..utils.logger import debug, info, warning, error
 
 
 class Generator:
@@ -20,6 +21,7 @@ class Generator:
         """
         self.output_dir = Path("docs")
         self.file_utils = FileUtils()
+        debug("文档生成器初始化完成")
         
     def generate_readme_files(self, parsed_readme: ParsedReadme, raw_content: str = "") -> GenerationResult:
         """
@@ -32,6 +34,8 @@ class Generator:
         Returns:
             GenerationResult: 生成结果对象
         """
+        debug(f"开始生成多语言README文件，共 {len(parsed_readme.content)} 种语言")
+        
         # 确保输出目录存在
         self._ensure_output_directory()
         
@@ -40,10 +44,23 @@ class Generator:
         
         # 保存各语言的README文件
         for lang, content in parsed_readme.content.items():
-            filename = self._get_filename_for_language(lang)
-            filepath = self.output_dir / filename
-            
             try:
+                debug(f"正在生成 {lang} 语言的README文件")
+                
+                # 英文README放在根目录下
+                if lang == "English" or lang == "en":
+                    filename = "README.md"
+                    filepath = Path(filename)
+                    # 在英文README开头添加多语言说明
+                    language_note = "> This is the English README. For other language versions, please see the [docs](./docs) directory.\n\n"
+                    content = language_note + content
+                    debug("英文README将保存到根目录")
+                else:
+                    # 其他语言放在docs目录下
+                    filename = self._get_filename_for_language(lang)
+                    filepath = self.output_dir / filename
+                    debug(f"{lang} README将保存到: {filepath}")
+                
                 self.file_utils.write_text_file(filepath, content)
                 saved_files.append({
                     "language": lang,
@@ -51,17 +68,19 @@ class Generator:
                     "filepath": str(filepath),
                     "size": len(content)
                 })
-                print(f"已保存 {lang} README 到 {filepath}")
+                debug(f"✅ 成功保存 {lang} README文件 ({len(content)} 字符)")
             except Exception as e:
                 failed_files.append({
                     "language": lang,
                     "filename": filename,
                     "error": str(e)
                 })
-                print(f"保存 {lang} README 失败: {e}")
+                error(f"❌ 保存 {lang} README 失败: {e}")
+                debug(f"保存失败详情: {e}")
         
 
         
+        debug(f"README文件生成完成: 成功 {len(saved_files)} 个，失败 {len(failed_files)} 个")
         return GenerationResult(
             saved_files=saved_files,
             failed_files=failed_files,
@@ -73,9 +92,9 @@ class Generator:
         """确保输出目录存在"""
         if not self.output_dir.exists():
             self.output_dir.mkdir(parents=True)
-            print(f"✓ 创建 {self.output_dir} 目录")
+            debug(f"创建输出目录: {self.output_dir}")
         else:
-            print(f"✓ {self.output_dir} 目录已存在")
+            debug(f"输出目录已存在: {self.output_dir}")
     
     def _get_filename_for_language(self, language: str) -> str:
         """
@@ -88,8 +107,10 @@ class Generator:
             str: 对应的文件名
         """
         filename_map = {
+            # 语言名称映射
             "中文": "README.zh.md",
-            "English": "README.en.md", 
+            "English": "README.md",  # 英文README放在根目录
+            "en": "README.md",       # 支持简写形式
             "日本語": "README.ja.md",
             "한국어": "README.ko.md",
             "Français": "README.fr.md",
@@ -97,7 +118,18 @@ class Generator:
             "Español": "README.es.md",
             "Italiano": "README.it.md",
             "Português": "README.pt.md",
-            "Русский": "README.ru.md"
+            "Русский": "README.ru.md",
+            # 语言代码映射
+            "zh": "README.zh.md",
+            "ja": "README.ja.md",
+            "ko": "README.ko.md",
+            "fr": "README.fr.md",
+            "de": "README.de.md",
+            "es": "README.es.md",
+            "it": "README.it.md",
+            "pt": "README.pt.md",
+            "ru": "README.ru.md",
+            "th": "README.th.md"
         }
         
         return filename_map.get(language, f"README.{language.lower()}.md")
@@ -123,7 +155,8 @@ class Generator:
         # 添加生成的文件信息
         for file_info in generation_result.saved_files:
             if file_info["language"] != "raw":
-                summary_lines.append(f"  - {file_info['filename']} ({file_info['size']} bytes)")
+                location = "根目录" if file_info["filename"] == "README.md" else f"{self.output_dir}目录"
+                summary_lines.append(f"  - {file_info['filename']} ({file_info['size']} bytes) - {location}")
         
         # 添加原始响应文件
         raw_files = [f for f in generation_result.saved_files if f["language"] == "raw"]
@@ -187,8 +220,9 @@ class Generator:
             Optional[str]: 语言名称，如果无法识别则返回None
         """
         filename_map = {
+            "README.md": "English",      # 根目录的README.md是英文
             "README.zh.md": "中文",
-            "README.en.md": "English",
+            "README.en.md": "English",   # 兼容旧格式
             "README.ja.md": "日本語",
             "README.ko.md": "한국어",
             "README.fr.md": "Français",
@@ -196,7 +230,8 @@ class Generator:
             "README.es.md": "Español",
             "README.it.md": "Italiano",
             "README.pt.md": "Português",
-            "README.ru.md": "Русский"
+            "README.ru.md": "Русский",
+            "README.th.md": "泰语"
         }
         
         return filename_map.get(filename) 

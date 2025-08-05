@@ -7,6 +7,8 @@
 import re
 from typing import Dict, List, Optional
 from ..models.types import ParsedReadme
+from ..utils.json_extractor import extract_json_content
+from ..utils.logger import debug, info, warning, error
 
 
 class Parser:
@@ -14,64 +16,15 @@ class Parser:
     
     def __init__(self):
         """初始化解析器"""
-        # 支持多种格式的语言模式
-        self.language_patterns = {
-            # 标准格式: ### 中文
-            "zh": [
-                r"### 中文\s*\n(.*?)(?=\n### |$)",
-                r"中文版本readme：\s*\n(.*?)(?=\n(?:英文版本|中文版本|泰语版本|日文版本|韩文版本|法文版本|德文版本|西班牙文版本|意大利文版本|葡萄牙文版本|俄文版本)readme|$)"
-            ],
-            "en": [
-                r"### English\s*\n(.*?)(?=\n### |$)",
-                r"英文版本readme:\s*\n(.*?)(?=\n(?:英文版本|中文版本|泰语版本|日文版本|韩文版本|法文版本|德文版本|西班牙文版本|意大利文版本|葡萄牙文版本|俄文版本)readme|$)"
-            ],
-            "ja": [
-                r"### 日本語\s*\n(.*?)(?=\n### |$)",
-                r"日文版本readme:\s*\n(.*?)(?=\n(?:英文版本|中文版本|泰语版本|日文版本|韩文版本|法文版本|德文版本|西班牙文版本|意大利文版本|葡萄牙文版本|俄文版本)readme|$)",
-                r"日本語版本readme：\s*\n(.*?)(?=\n(?:英文版本|中文版本|泰语版本|日文版本|韩文版本|法文版本|德文版本|西班牙文版本|意大利文版本|葡萄牙文版本|俄文版本)readme|$)",
-                r"日本語版本readme：\s*\n(.*?)$",
-                r"日本語版本readme:\s*\n(.*?)(?=\n(?:英文版本|中文版本|泰语版本|日文版本|韩文版本|法文版本|德文版本|西班牙文版本|意大利文版本|葡萄牙文版本|俄文版本)readme|$)",
-                r"日本語版本readme:\s*\n(.*?)$"
-            ],
-            "ko": [
-                r"### 한국어\s*\n(.*?)(?=\n### |$)",
-                r"韩文版本readme:\s*\n(.*?)(?=\n(?:英文版本|中文版本|泰语版本|日文版本|韩文版本|法文版本|德文版本|西班牙文版本|意大利文版本|葡萄牙文版本|俄文版本)readme|$)"
-            ],
-            "fr": [
-                r"### Français\s*\n(.*?)(?=\n### |$)",
-                r"法文版本readme:\s*\n(.*?)(?=\n(?:英文版本|中文版本|泰语版本|日文版本|韩文版本|法文版本|德文版本|西班牙文版本|意大利文版本|葡萄牙文版本|俄文版本)readme|$)"
-            ],
-            "de": [
-                r"### Deutsch\s*\n(.*?)(?=\n### |$)",
-                r"德文版本readme:\s*\n(.*?)(?=\n(?:英文版本|中文版本|泰语版本|日文版本|韩文版本|法文版本|德文版本|西班牙文版本|意大利文版本|葡萄牙文版本|俄文版本)readme|$)"
-            ],
-            "es": [
-                r"### Español\s*\n(.*?)(?=\n### |$)",
-                r"西班牙文版本readme:\s*\n(.*?)(?=\n(?:英文版本|中文版本|泰语版本|日文版本|韩文版本|法文版本|德文版本|西班牙文版本|意大利文版本|葡萄牙文版本|俄文版本)readme|$)"
-            ],
-            "it": [
-                r"### Italiano\s*\n(.*?)(?=\n### |$)",
-                r"意大利文版本readme:\s*\n(.*?)(?=\n(?:英文版本|中文版本|泰语版本|日文版本|韩文版本|法文版本|德文版本|西班牙文版本|意大利文版本|葡萄牙文版本|俄文版本)readme|$)"
-            ],
-            "pt": [
-                r"### Português\s*\n(.*?)(?=\n### |$)",
-                r"葡萄牙文版本readme:\s*\n(.*?)(?=\n(?:英文版本|中文版本|泰语版本|日文版本|韩文版本|法文版本|德文版本|西班牙文版本|意大利文版本|葡萄牙文版本|俄文版本)readme|$)"
-            ],
-            "ru": [
-                r"### Русский\s*\n(.*?)(?=\n### |$)",
-                r"俄文版本readme:\s*\n(.*?)(?=\n(?:英文版本|中文版本|泰语版本|日文版本|韩文版本|法文版本|德文版本|西班牙文版本|意大利文版本|葡萄牙文版本|俄文版本)readme|$)"
-            ]
-        }
+        # 只保留JSON格式解析，移除正则表达式模式
+        self.language_patterns = {}
         
         # 特殊处理泰语（AI可能生成"泰语版本readme:"）
-        self.language_patterns["th"] = [
-            r"### 泰语\s*\n(.*?)(?=\n### |$)",
-            r"泰语版本readme:\s*\n(.*?)(?=\n(?:英文版本|中文版本|泰语版本|日文版本|韩文版本|法文版本|德文版本|西班牙文版本|意大利文版本|葡萄牙文版本|俄文版本)readme|$)"
-        ]
+        self.language_patterns["th"] = []
         
         self.filename_map = {
             "zh": "README.zh.md",
-            "en": "README.en.md", 
+            "en": "README.md",      # 英文README放在根目录
             "ja": "README.ja.md",
             "ko": "README.ko.md",
             "fr": "README.fr.md",
@@ -88,42 +41,45 @@ class Parser:
         解析多语言README内容
         
         Args:
-            response_text: 翻译响应文本
+            response_text: 翻译响应文本（JSON格式）
             languages: 要解析的语言列表，如果为None则解析所有支持的语言
             
         Returns:
             ParsedReadme: 解析结果对象
         """
         if languages is None:
-            languages = list(self.language_patterns.keys())
+            # 直接使用所有支持的语言代码
+            languages = ["en", "zh", "ja", "ko", "fr", "de", "es", "it", "pt", "ru", "th"]
         
         results = {}
         found_languages = []
         
-        print("正在解析多语言 README...")
+        # 使用新的JSON提取器
+        json_data, language_content = extract_json_content(response_text)
         
-        for lang in languages:
-            if lang in self.language_patterns:
-                patterns = self.language_patterns[lang]
-                content = None
-                
-                # 尝试所有模式
-                for pattern in patterns:
-                    match = re.search(pattern, response_text, re.DOTALL)
-                    if match:
-                        content = match.group(1).strip()
-                        if content:
-                            results[lang] = content
-                            found_languages.append(lang)
-                            print(f"找到 {lang} 版本")
-                            break
+        if json_data:
+            debug(f"🔍 成功提取JSON数据，包含 {len(json_data)} 个键")
+            
+            # 使用提取的语言内容
+            for lang_code, content in language_content.items():
+                if lang_code in languages:
+                    results[lang_code] = content
+                    found_languages.append(lang_code)
+                    debug(f"✅ 成功解析 {lang_code} 语言内容")
+            
+            if results:
+                debug(f"✅ 成功解析 {len(results)} 种语言")
+                return ParsedReadme(
+                    content=results,
+                    languages=found_languages,
+                    total_count=len(results)
+                )
+        else:
+            error("❌ 无法提取JSON数据")
+            debug(f"🔍 原始响应文本: {response_text[:200]}...")
         
         if not results:
-            print("未能解析到多语言 README 内容")
-            # 调试：显示响应内容的前500个字符
-            print(f"响应内容预览: {response_text[:500]}...")
-        else:
-            print(f"成功解析了 {len(results)} 种语言的 README")
+            warning("⚠️  未能解析到多语言 README 内容")
         
         return ParsedReadme(
             content=results,
@@ -188,4 +144,31 @@ class Parser:
                     sections[lang] = match.group(1).strip()
                     break
         
-        return sections 
+        return sections
+    
+    def _map_json_key_to_language(self, json_key: str) -> Optional[str]:
+        """
+        将JSON键映射到语言代码
+        
+        Args:
+            json_key: JSON中的键名
+            
+        Returns:
+            Optional[str]: 对应的语言代码，如果无法映射则返回None
+        """
+        # JSON键到语言代码的映射
+        json_key_map = {
+            "English readme": "en",
+            "Chinese readme": "zh", 
+            "Japanese readme": "ja",
+            "日本語 readme": "ja",  # 添加日语变体
+            "Korean readme": "ko",
+            "French readme": "fr",
+            "German readme": "de",
+            "Spanish readme": "es",
+            "Italian readme": "it",
+            "Portuguese readme": "pt",
+            "Russian readme": "ru"
+        }
+        
+        return json_key_map.get(json_key) 

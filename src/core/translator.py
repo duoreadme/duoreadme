@@ -14,6 +14,7 @@ from ..services.sse_client import SSEClient
 from ..utils.config import Config
 from ..utils.file_utils import FileUtils
 from ..models.types import TranslationRequest, TranslationResponse
+from ..utils.logger import debug, info, warning, error
 
 
 class Translator:
@@ -49,7 +50,7 @@ class Translator:
         max_content_length = 15000  # 15KB限制
         
         if len(project_content) > max_content_length:
-            print(f"⚠ 内容过长 ({len(project_content)} 字符)，将分批处理")
+            warning(f"⚠ 内容过长 ({len(project_content)} 字符)，将分批处理")
             return self._translate_project_in_batches(project_content, languages, max_content_length)
         else:
             # 构建翻译请求
@@ -76,9 +77,9 @@ class Translator:
         # 检查是否存在 .gitignore 文件
         gitignore_path = project_path / ".gitignore"
         if gitignore_path.exists():
-            print(f"✓ 发现 .gitignore 文件，将过滤忽略的文件")
+            debug(f"✓ 发现 .gitignore 文件，将过滤忽略的文件")
         else:
-            print(f"⚠ 未发现 .gitignore 文件，将读取所有文本文件")
+            warning(f"⚠ 未发现 .gitignore 文件，将读取所有文本文件")
         
         # 获取项目文件列表（应用 .gitignore 过滤）
         project_files = self.file_utils.get_project_files(project_path, include_gitignore=True)
@@ -94,18 +95,18 @@ class Translator:
                 content += "=== README.md ===\n"
                 content += compressed_readme
                 content += "\n\n"
-                print(f"✓ 已读取并压缩 {readme_path.relative_to(project_path)} ({len(compressed_readme)} 字符)")
+                debug(f"✓ 已读取并压缩 {readme_path.relative_to(project_path)} ({len(compressed_readme)} 字符)")
             except Exception as e:
-                print(f"✗ 读取 README.md 失败: {e}")
+                error(f"✗ 读取 README.md 失败: {e}")
         else:
-            print(f"⚠ 未找到 README.md")
+            warning(f"⚠ 未找到 README.md")
         
         # 智能选择最重要的文件
         other_files = [f for f in project_files if f.name.lower() != "readme.md"]
         important_files = self._select_important_files(other_files, max_files=2)
         
         if important_files:
-            print(f"✓ 从 {len(other_files)} 个文件中选择了 {len(important_files)} 个重要文件")
+            debug(f"✓ 从 {len(other_files)} 个文件中选择了 {len(important_files)} 个重要文件")
             
             for file_path in important_files:
                 try:
@@ -118,11 +119,11 @@ class Translator:
                     content += f"=== {relative_path} ===\n"
                     content += compressed_content
                     content += "\n\n"
-                    print(f"✓ 已读取并压缩 {relative_path} ({len(compressed_content)} 字符)")
+                    debug(f"✓ 已读取并压缩 {relative_path} ({len(compressed_content)} 字符)")
                 except Exception as e:
-                    print(f"✗ 读取 {file_path} 失败: {e}")
+                    error(f"✗ 读取 {file_path} 失败: {e}")
         else:
-            print(f"⚠ 未找到其他可读取的文件")
+            warning(f"⚠ 未找到其他可读取的文件")
         
         return content
     
@@ -253,7 +254,7 @@ class Translator:
         Returns:
             TranslationResponse: 翻译响应对象
         """
-        print(f"📦 开始分批处理，总内容长度: {len(project_content)} 字符")
+        debug(f"📦 开始分批处理，总内容长度: {len(project_content)} 字符")
         
         # 将内容按文件分割
         content_parts = self._split_content_by_files(project_content)
@@ -265,17 +266,17 @@ class Translator:
                 languages=languages or []
             )
         
-        print(f"📦 内容已分割为 {len(content_parts)} 个部分")
+        debug(f"📦 内容已分割为 {len(content_parts)} 个部分")
         
         # 合并小部分，确保每批不超过限制
         batches = self._create_batches(content_parts, max_length)
         
-        print(f"📦 将分 {len(batches)} 批处理")
+        debug(f"📦 将分 {len(batches)} 批处理")
         
         all_responses = []
         
         for i, batch_content in enumerate(batches, 1):
-            print(f"📦 处理第 {i}/{len(batches)} 批 (长度: {len(batch_content)} 字符)")
+            debug(f"📦 处理第 {i}/{len(batches)} 批 (长度: {len(batch_content)} 字符)")
             
             # 构建批次请求
             batch_request = self._build_batch_translation_request(batch_content, languages, i, len(batches))
@@ -284,7 +285,7 @@ class Translator:
             batch_response = self._execute_translation(batch_request)
             
             if not batch_response.success:
-                print(f"❌ 第 {i} 批翻译失败: {batch_response.error}")
+                error(f"❌ 第 {i} 批翻译失败: {batch_response.error}")
                 return batch_response
             
             all_responses.append(batch_response.content)
@@ -468,7 +469,7 @@ class Translator:
                 # 如果没有配置，使用默认的语言代码
                 languages = ["zh", "en", "ja"]
         
-        print(f"🔤 目标语言: {languages}")
+        print(f"目标语言: {languages}")
         
         # 将语言代码转换为语言名称
         language_names = [self.get_language_name(lang) for lang in languages]

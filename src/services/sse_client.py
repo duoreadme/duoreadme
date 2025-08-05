@@ -11,6 +11,7 @@ import requests
 from typing import Dict, Any, Optional
 from ..utils.config import Config
 from ..models.types import TranslationRequest
+from ..utils.logger import debug, info, warning, error
 
 
 class SSEClient:
@@ -88,8 +89,8 @@ class SSEClient:
         headers = {"Accept": "text/event-stream"}
         
         try:
-            print(f"正在发送请求到: {url}")
-            print(f"请求数据: {json.dumps(request_data, ensure_ascii=False, indent=2)}")
+            debug(f"正在发送请求到: {url}")
+            debug(f"请求数据: {json.dumps(request_data, ensure_ascii=False, indent=2)}")
             
             # 发送请求
             response = requests.post(
@@ -100,51 +101,55 @@ class SSEClient:
                 timeout=self.timeout
             )
             
-            print(f"响应状态码: {response.status_code}")
+            debug(f"响应状态码: {response.status_code}")
             
             if response.status_code != 200:
-                print(f"响应内容: {response.text}")
+                error(f"响应内容: {response.text}")
                 raise Exception(f"HTTP请求失败: {response.status_code} - {response.text}")
             
             # 处理SSE响应
             client = sseclient.SSEClient(response)
             response_text = ""
             
-            print("开始处理SSE响应...")
+            debug("开始处理SSE响应...")
             
             for event in client.events():
-                print(f"收到事件: {event.event}")
-                print(f"事件数据: {event.data}")
+                debug(f"收到事件: {event.event}")
+                debug(f"事件数据: {event.data}")
                 
                 try:
                     data = json.loads(event.data)
                     if event.event == "reply":
                         if data["payload"]["is_from_self"]:
-                            print(f'发送内容: {data["payload"]["content"]}')
+                            debug(f'发送内容: {data["payload"]["content"]}')
                         elif data["payload"]["is_final"]:
-                            print("翻译完成")
+                            # 最后一个事件使用 INFO 级别
+                            info(f"收到事件: {event.event}")
+                            info(f"事件数据: {event.data}")
+                            info("翻译完成")
                             response_text = data["payload"]["content"]
                             break
                         else:
                             content = data["payload"]["content"]
                             response_text += content
-                            print(content, end="", flush=True)
+                            # 流式输出保持原样，不记录日志
                             
                             # 节流控制
                             if self.streaming_throttle > 0:
                                 time.sleep(self.streaming_throttle / 1000.0)
                     else:
-                        print(f"未处理的事件类型: {event.event}")
+                        debug(f"未处理的事件类型: {event.event}")
                 
                 except json.JSONDecodeError as e:
-                    print(f"JSON解析失败: {e}")
+                    error(f"JSON解析失败: {e}")
                     continue
                 except Exception as e:
-                    print(f"处理SSE事件失败: {e}")
+                    error(f"处理SSE事件失败: {e}")
                     continue
             
-            print(f"最终响应文本长度: {len(response_text)}")
-            print()  # 换行
+            debug(f"最终响应文本长度: {len(response_text)}")
+            # 最终的JSON响应设置为INFO级别
+            info(f"最终响应文本长度: {len(response_text)}")
             return response_text
             
         except requests.exceptions.Timeout:
@@ -173,7 +178,7 @@ class SSEClient:
             return True
             
         except Exception as e:
-            print(f"连接测试失败: {e}")
+            error(f"连接测试失败: {e}")
             return False
     
     def get_config_info(self) -> Dict[str, Any]:

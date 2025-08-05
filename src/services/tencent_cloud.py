@@ -12,6 +12,7 @@ from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentClo
 from tencentcloud.common.profile.client_profile import ClientProfile
 from tencentcloud.common.profile.http_profile import HttpProfile
 from ..utils.config import Config
+from ..utils.logger import debug, info, warning, error
 
 
 class TencentCloudService:
@@ -27,6 +28,7 @@ class TencentCloudService:
         self.config = config
         self._service = "lke"
         self._api_version = "2023-11-30"
+        debug("腾讯云服务初始化完成")
     
     def get_token(self, secret: Dict[str, str], profile: Dict[str, str], region: str, params: Dict[str, Any]) -> str:
         """
@@ -41,7 +43,7 @@ class TencentCloudService:
         Returns:
             str: 令牌字符串，失败时返回空字符串
         """
-        print(f"profile:{profile}, region:{region}, params:{params}")
+        debug(f"开始获取腾讯云令牌: profile={profile}, region={region}")
         
         try:
             # 获取密钥信息
@@ -53,6 +55,8 @@ class TencentCloudService:
                 secret_id = self.config.get("tencent_cloud.secret_id", "")
             if not secret_key:
                 secret_key = self.config.get("tencent_cloud.secret_key", "")
+            
+            debug("腾讯云凭证配置完成")
             
             # 创建凭证
             cred = credential.Credential(secret_id, secret_key)
@@ -67,6 +71,8 @@ class TencentCloudService:
             http_profile.scheme = scheme
             http_profile.reqMethod = method
             
+            debug(f"HTTP配置: domain={domain}, scheme={scheme}, method={method}")
+            
             # 创建客户端配置
             client_profile = ClientProfile()
             client_profile.httpProfile = http_profile
@@ -80,23 +86,27 @@ class TencentCloudService:
                 profile=client_profile
             )
             
+            debug("腾讯云客户端创建完成，开始调用API")
+            
             # 调用API
             resp = common_client.call_json("GetWsToken", params)
-            print("resp", resp)
+            debug("腾讯云API调用成功")
             
             # 提取令牌
             token = ""
             if "Response" in resp and "Token" in resp["Response"]:
                 token = resp["Response"]["Token"]
+                debug("成功提取令牌")
+            else:
+                warning("API响应中未找到Token字段")
             
-            print("token", token)
             return token
             
         except TencentCloudSDKException as err:
-            print(f"腾讯云SDK异常: {err}")
+            error(f"腾讯云SDK异常: {err}")
             return ""
         except Exception as err:
-            print(f"获取令牌失败: {err}")
+            error(f"获取令牌失败: {err}")
             return ""
     
     def validate_credentials(self) -> bool:
