@@ -179,8 +179,3 @@ Desktop.ini
 config.yaml
 .env.local
 .env.production
-
-# Generated files
-README_translation_response.txt
-README.*.md
-.python-version
