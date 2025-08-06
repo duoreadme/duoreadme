@@ -1,7 +1,7 @@
 """
-翻译核心模块
+生成核心模块
 
-负责将项目内容翻译成多种语言。
+负责将项目内容生成多种语言。
 """
 
 import os
@@ -18,7 +18,7 @@ from ..utils.logger import debug, info, warning, error
 
 
 class Translator:
-    """翻译器类，负责项目内容的翻译"""
+    """生成器类，负责项目内容的生成"""
     
     def __init__(self, config: Optional[Config] = None):
         """
@@ -34,14 +34,14 @@ class Translator:
         
     def translate_project(self, project_path: str, languages: Optional[List[str]] = None) -> TranslationResponse:
         """
-        翻译整个项目
+        生成整个项目
         
         Args:
             project_path: 项目路径
-            languages: 要翻译的语言列表，如果为None则使用默认语言
+            languages: 要生成的语言列表，如果为None则使用默认语言
             
         Returns:
-            TranslationResponse: 翻译响应对象
+            TranslationResponse: 生成响应对象
         """
         # 读取项目内容
         project_content = self._read_project_content(project_path)
@@ -53,10 +53,10 @@ class Translator:
             warning(f"⚠ 内容过长 ({len(project_content)} 字符)，将分批处理")
             return self._translate_project_in_batches(project_content, languages, max_content_length)
         else:
-            # 构建翻译请求
+            # 构建生成请求
             request = self._build_translation_request(project_content, languages)
             
-            # 执行翻译
+            # 执行生成
             response = self._execute_translation(request)
             
             return response
@@ -244,7 +244,7 @@ class Translator:
     
     def _translate_project_in_batches(self, project_content: str, languages: Optional[List[str]] = None, max_length: int = 30000) -> TranslationResponse:
         """
-        分批翻译项目内容
+        分批生成项目内容
         
         Args:
             project_content: 项目内容
@@ -252,7 +252,7 @@ class Translator:
             max_length: 每批最大长度
             
         Returns:
-            TranslationResponse: 翻译响应对象
+            TranslationResponse: 生成响应对象
         """
         debug(f"📦 开始分批处理，总内容长度: {len(project_content)} 字符")
         
@@ -281,11 +281,11 @@ class Translator:
             # 构建批次请求
             batch_request = self._build_batch_translation_request(batch_content, languages, i, len(batches))
             
-            # 执行翻译
+            # 执行生成
             batch_response = self._execute_translation(batch_request)
             
             if not batch_response.success:
-                error(f"❌ 第 {i} 批翻译失败: {batch_response.error}")
+                error(f"❌ 第 {i} 批生成失败: {batch_response.error}")
                 return batch_response
             
             all_responses.append(batch_response.content)
@@ -364,7 +364,7 @@ class Translator:
     
     def _build_batch_translation_request(self, content: str, languages: Optional[List[str]] = None, batch_num: int = 1, total_batches: int = 1) -> TranslationRequest:
         """
-        构建批次翻译请求
+        构建批次生成请求
         
         Args:
             content: 批次内容
@@ -373,7 +373,7 @@ class Translator:
             total_batches: 总批次数
             
         Returns:
-            TranslationRequest: 翻译请求对象
+            TranslationRequest: 生成请求对象
         """
         if languages is None:
             # 从配置文件获取默认语言
@@ -389,7 +389,7 @@ class Translator:
         language_names = [self.get_language_name(lang) for lang in languages]
         languages_str = "、".join(language_names)
         
-        prompt = f"""这是项目内容的第 {batch_num}/{total_batches} 部分，请将以下项目代码和README翻译成多种语言的README文档，必须严格按照以下语言列表生成：{languages_str}。
+        prompt = f"""这是项目内容的第 {batch_num}/{total_batches} 部分，请将以下项目代码和README生成多种语言的README文档，必须严格按照以下语言列表生成：{languages_str}。
 
 项目内容（第 {batch_num}/{total_batches} 部分）：
 {content}
@@ -450,14 +450,14 @@ class Translator:
     
     def _build_translation_request(self, content: str, languages: Optional[List[str]] = None) -> TranslationRequest:
         """
-        构建翻译请求
+        构建生成请求
         
         Args:
-            content: 要翻译的内容
+            content: 要生成的内容
             languages: 目标语言列表
             
         Returns:
-            TranslationRequest: 翻译请求对象
+            TranslationRequest: 生成请求对象
         """
         if languages is None:
             # 从配置文件获取默认语言
@@ -484,7 +484,7 @@ class Translator:
         }
         
         # 构建简洁的prompt
-        prompt = f"""翻译项目为{languages_str}README，格式：
+        prompt = f"""生成项目为{languages_str}README，格式：
 
 项目：{content}
 
@@ -515,15 +515,15 @@ class Translator:
     
     def _execute_translation(self, request: TranslationRequest) -> TranslationResponse:
         """
-        执行翻译
+        执行生成
         
         Args:
-            request: 翻译请求对象
+            request: 生成请求对象
             
         Returns:
-            TranslationResponse: 翻译响应对象
+            TranslationResponse: 生成响应对象
         """
-        print("正在发送翻译请求...")
+        print("正在发送生成请求...")
         
         try:
             # 使用SSE客户端发送请求
@@ -537,7 +537,7 @@ class Translator:
             )
             
         except Exception as e:
-            print(f"❌ 翻译失败: {e}")
+            print(f"❌ 生成失败: {e}")
             return TranslationResponse(
                 success=False,
                 error=str(e),
@@ -552,8 +552,11 @@ class Translator:
             List[str]: 支持的语言列表
         """
         return [
-            "zh", "en", "ja", "ko", "fr", 
-            "de", "es", "it", "pt", "ru"
+            "zh-Hans", "zh-Hant", "en", "ja", "ko", "fr", "de", "es", "it", "pt", "pt-PT", "ru",
+            "th", "vi", "hi", "ar", "tr", "pl", "nl", "sv", "da", "no", "nb", "fi", "cs", "sk", 
+            "hu", "ro", "bg", "hr", "sl", "et", "lv", "lt", "mt", "el", "ca", "eu", "gl", "af", 
+            "zu", "xh", "st", "sw", "yo", "ig", "ha", "am", "or", "bn", "gu", "pa", "te", "kn", 
+            "ml", "ta", "si", "my", "km", "lo", "ne", "ur", "fa", "ps", "sd", "he", "yue"
         ]
     
     def _normalize_language_code(self, lang: str) -> str:
@@ -568,7 +571,8 @@ class Translator:
         """
         # 反向映射：语言名称 -> 语言代码
         reverse_language_map = {
-            "中文": "zh",
+            "中文": "zh-Hans",
+            "繁體中文": "zh-Hant",
             "English": "en", 
             "日本語": "ja",
             "한국어": "ko",
@@ -577,11 +581,67 @@ class Translator:
             "Español": "es",
             "Italiano": "it",
             "Português": "pt",
-            "Русский": "ru"
+            "Português (Portugal)": "pt-PT",
+            "Русский": "ru",
+            "Tiếng Việt": "vi",
+            "ไทย": "th",
+            "हिन्दी": "hi",
+            "العربية": "ar",
+            "Türkçe": "tr",
+            "Polski": "pl",
+            "Nederlands": "nl",
+            "Svenska": "sv",
+            "Dansk": "da",
+            "Norsk": "no",
+            "Norsk Bokmål": "nb",
+            "Suomi": "fi",
+            "Čeština": "cs",
+            "Slovenčina": "sk",
+            "Magyar": "hu",
+            "Română": "ro",
+            "български": "bg",
+            "Hrvatski": "hr",
+            "Slovenščina": "sl",
+            "Eesti": "et",
+            "Latviešu": "lv",
+            "Lietuvių": "lt",
+            "Malti": "mt",
+            "Ελληνικά": "el",
+            "Català": "ca",
+            "Euskara": "eu",
+            "Galego": "gl",
+            "Afrikaans": "af",
+            "IsiZulu": "zu",
+            "isiXhosa": "xh",
+            "Sesotho": "st",
+            "Kiswahili": "sw",
+            "Èdè Yorùbá": "yo",
+            "Asụsụ Igbo": "ig",
+            "Hausa": "ha",
+            "አማርኛ": "am",
+            "ଓଡ଼ିଆ": "or",
+            "বাংলা": "bn",
+            "ગુજરાતી": "gu",
+            "ਪੰਜਾਬੀ": "pa",
+            "తెలుగు": "te",
+            "ಕನ್ನಡ": "kn",
+            "മലയാളം": "ml",
+            "தமிழ்": "ta",
+            "සිංහල": "si",
+            "မြန်မာဘာသာ": "my",
+            "ភាសាខ្មែរ": "km",
+            "ລາວ": "lo",
+            "नेपाली": "ne",
+            "اردو": "ur",
+            "فارسی": "fa",
+            "پښتو": "ps",
+            "سنڌي": "sd",
+            "עברית": "he",
+            "粵語": "yue"
         }
         
         # 如果已经是语言代码，直接返回
-        if lang in ["zh", "en", "ja", "ko", "fr", "de", "es", "it", "pt", "ru"]:
+        if lang in ["zh-Hans", "zh-Hant", "en", "ja", "ko", "fr", "de", "es", "it", "pt", "pt-PT", "ru", "th", "vi", "hi", "ar", "tr", "pl", "nl", "sv", "da", "no", "nb", "fi", "cs", "sk", "hu", "ro", "bg", "hr", "sl", "et", "lv", "lt", "mt", "el", "ca", "eu", "gl", "af", "zu", "xh", "st", "sw", "yo", "ig", "ha", "am", "or", "bn", "gu", "pa", "te", "kn", "ml", "ta", "si", "my", "km", "lo", "ne", "ur", "fa", "ps", "sd", "he", "yue"]:
             return lang
         
         # 如果是语言名称，转换为语言代码
@@ -598,7 +658,8 @@ class Translator:
             str: 语言名称
         """
         language_map = {
-            "zh": "中文",
+            "zh-Hans": "中文",
+            "zh-Hant": "繁體中文",
             "en": "English", 
             "ja": "日本語",
             "ko": "한국어",
@@ -607,6 +668,62 @@ class Translator:
             "es": "Español",
             "it": "Italiano",
             "pt": "Português",
-            "ru": "Русский"
+            "pt-PT": "Português (Portugal)",
+            "ru": "Русский",
+            "vi": "Tiếng Việt",
+            "th": "ไทย",
+            "hi": "हिन्दी",
+            "ar": "العربية",
+            "tr": "Türkçe",
+            "pl": "Polski",
+            "nl": "Nederlands",
+            "sv": "Svenska",
+            "da": "Dansk",
+            "no": "Norsk",
+            "nb": "Norsk Bokmål",
+            "fi": "Suomi",
+            "cs": "Čeština",
+            "sk": "Slovenčina",
+            "hu": "Magyar",
+            "ro": "Română",
+            "bg": "български",
+            "hr": "Hrvatski",
+            "sl": "Slovenščina",
+            "et": "Eesti",
+            "lv": "Latviešu",
+            "lt": "Lietuvių",
+            "mt": "Malti",
+            "el": "Ελληνικά",
+            "ca": "Català",
+            "eu": "Euskara",
+            "gl": "Galego",
+            "af": "Afrikaans",
+            "zu": "IsiZulu",
+            "xh": "isiXhosa",
+            "st": "Sesotho",
+            "sw": "Kiswahili",
+            "yo": "Èdè Yorùbá",
+            "ig": "Asụsụ Igbo",
+            "ha": "Hausa",
+            "am": "አማርኛ",
+            "or": "ଓଡ଼ିଆ",
+            "bn": "বাংলা",
+            "gu": "ગુજરાતી",
+            "pa": "ਪੰਜਾਬੀ",
+            "te": "తెలుగు",
+            "kn": "ಕನ್ನಡ",
+            "ml": "മലയാളം",
+            "ta": "தமிழ்",
+            "si": "සිංහල",
+            "my": "မြန်မာဘာသာ",
+            "km": "ភាសាខ្មែរ",
+            "lo": "ລາວ",
+            "ne": "नेपाली",
+            "ur": "اردو",
+            "fa": "فارسی",
+            "ps": "پښتو",
+            "sd": "سنڌي",
+            "he": "עברית",
+            "yue": "粵語"
         }
         return language_map.get(lang_code, lang_code) 

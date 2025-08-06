@@ -33,7 +33,7 @@ class SSEClient:
         发送SSE请求
         
         Args:
-            request: 翻译请求对象
+            request: 生成请求对象
             
         Returns:
             str: 响应内容

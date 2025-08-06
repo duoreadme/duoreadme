@@ -22,7 +22,7 @@ setup(
     version="1.0.0",
     author="DuoReadme Team",
     author_email="team@duoreadme.com",
-    description="一个强大的CLI工具，用于将项目代码和README自动翻译成多种语言并生成规范化的多语言文档",
+    description="一个强大的CLI工具，用于将项目代码和README自动生成多种语言并生成规范化的多语言文档",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/your-username/duoreadme",

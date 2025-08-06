@@ -10,7 +10,7 @@ from typing import Dict, List, Optional, Any
 
 @dataclass
 class TranslationRequest:
-    """翻译请求数据类"""
+    """生成请求数据类"""
     content: str
     languages: List[str]
     bot_app_key: str
@@ -20,7 +20,7 @@ class TranslationRequest:
 
 @dataclass
 class TranslationResponse:
-    """翻译响应数据类"""
+    """生成响应数据类"""
     success: bool
     content: str = ""
     languages: List[str] = None

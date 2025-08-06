@@ -15,7 +15,7 @@ from ..utils.logger import enable_debug, info, debug
 
 @click.command()
 @click.option('--project-path', default='.', help='项目路径，默认为当前目录')
-@click.option('--languages', help='要翻译的语言，用逗号分隔，如：zh,en,ja')
+@click.option('--languages', help='要生成的语言，用逗号分隔，如：zh-Hans,en,ja')
 @click.option('--config', help='配置文件路径')
 @click.option('--verbose', is_flag=True, help='显示详细输出')
 @click.option('--debug', 'debug_mode', is_flag=True, help='启用调试模式，输出 DEBUG 级别日志')
@@ -51,7 +51,7 @@ def gen_command(project_path, languages, config, verbose, debug_mode):
             language_list = [lang.strip() for lang in languages.split(',')]
             debug(f"目标语言: {language_list}")
         
-        # 执行翻译流程
+        # 执行生成流程
         run_translation_workflow(
             translator=translator,
             parser_obj=parser_obj,
@@ -78,18 +78,18 @@ def run_translation_workflow(
     languages: list = None,
     verbose: bool = False
 ):
-    """执行翻译工作流程"""
-    debug(f"开始翻译项目: {project_path}")
+    """执行生成工作流程"""
+    debug(f"开始生成项目: {project_path}")
     
-    # 翻译项目内容
+    # 生成项目内容
     translation_response = translator.translate_project(project_path, languages)
     
     if not translation_response.success:
-        click.echo(f"❌ 翻译失败: {translation_response.error}", err=True)
-        debug(f"翻译失败详情: {translation_response.error}")
+        click.echo(f"❌ 生成失败: {translation_response.error}", err=True)
+        debug(f"生成失败详情: {translation_response.error}")
         return
     
-    debug("翻译响应处理完成")
+    debug("生成响应处理完成")
     
     # 解析多语言README
     parsed_readme = parser_obj.parse_multilingual_content(

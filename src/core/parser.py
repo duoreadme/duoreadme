@@ -1,7 +1,7 @@
 """
 内容解析器模块
 
-负责解析翻译响应中的多语言README内容。
+负责解析生成响应中的多语言README内容。
 """
 
 import re
@@ -24,6 +24,8 @@ class Parser:
         
         self.filename_map = {
             "zh": "README.zh.md",
+            "zh-Hans": "README.zh.md",
+            "zh-Hant": "README.zh-Hant.md",
             "en": "README.md",      # 英文README放在根目录
             "ja": "README.ja.md",
             "ko": "README.ko.md",
@@ -32,8 +34,63 @@ class Parser:
             "es": "README.es.md",
             "it": "README.it.md",
             "pt": "README.pt.md",
+            "pt-PT": "README.pt-PT.md",
             "ru": "README.ru.md",
-            "th": "README.th.md"
+            "th": "README.th.md",
+            "vi": "README.vi.md",
+            "hi": "README.hi.md",
+            "ar": "README.ar.md",
+            "tr": "README.tr.md",
+            "pl": "README.pl.md",
+            "nl": "README.nl.md",
+            "sv": "README.sv.md",
+            "da": "README.da.md",
+            "no": "README.no.md",
+            "nb": "README.nb.md",
+            "fi": "README.fi.md",
+            "cs": "README.cs.md",
+            "sk": "README.sk.md",
+            "hu": "README.hu.md",
+            "ro": "README.ro.md",
+            "bg": "README.bg.md",
+            "hr": "README.hr.md",
+            "sl": "README.sl.md",
+            "et": "README.et.md",
+            "lv": "README.lv.md",
+            "lt": "README.lt.md",
+            "mt": "README.mt.md",
+            "el": "README.el.md",
+            "ca": "README.ca.md",
+            "eu": "README.eu.md",
+            "gl": "README.gl.md",
+            "af": "README.af.md",
+            "zu": "README.zu.md",
+            "xh": "README.xh.md",
+            "st": "README.st.md",
+            "sw": "README.sw.md",
+            "yo": "README.yo.md",
+            "ig": "README.ig.md",
+            "ha": "README.ha.md",
+            "am": "README.am.md",
+            "or": "README.or.md",
+            "bn": "README.bn.md",
+            "gu": "README.gu.md",
+            "pa": "README.pa.md",
+            "te": "README.te.md",
+            "kn": "README.kn.md",
+            "ml": "README.ml.md",
+            "ta": "README.ta.md",
+            "si": "README.si.md",
+            "my": "README.my.md",
+            "km": "README.km.md",
+            "lo": "README.lo.md",
+            "ne": "README.ne.md",
+            "ur": "README.ur.md",
+            "fa": "README.fa.md",
+            "ps": "README.ps.md",
+            "sd": "README.sd.md",
+            "he": "README.he.md",
+            "yue": "README.yue.md"
         }
     
     def parse_multilingual_content(self, response_text: str, languages: Optional[List[str]] = None) -> ParsedReadme:
@@ -41,7 +98,7 @@ class Parser:
         解析多语言README内容
         
         Args:
-            response_text: 翻译响应文本（JSON格式）
+            response_text: 生成响应文本（JSON格式）
             languages: 要解析的语言列表，如果为None则解析所有支持的语言
             
         Returns:
@@ -49,7 +106,7 @@ class Parser:
         """
         if languages is None:
             # 直接使用所有支持的语言代码
-            languages = ["en", "zh", "ja", "ko", "fr", "de", "es", "it", "pt", "ru", "th"]
+            languages = ["en", "zh-Hans", "zh-Hant", "ja", "ko", "fr", "de", "es", "it", "pt", "pt-PT", "ru", "th", "vi", "hi", "ar", "tr", "pl", "nl", "sv", "da", "no", "nb", "fi", "cs", "sk", "hu", "ro", "bg", "hr", "sl", "et", "lv", "lt", "mt", "el", "ca", "eu", "gl", "af", "zu", "xh", "st", "sw", "yo", "ig", "ha", "am", "or", "bn", "gu", "pa", "te", "kn", "ml", "ta", "si", "my", "km", "lo", "ne", "ur", "fa", "ps", "sd", "he", "yue", "zh-Hant"]
         
         results = {}
         found_languages = []
@@ -168,7 +225,17 @@ class Parser:
             "Spanish readme": "es",
             "Italian readme": "it",
             "Portuguese readme": "pt",
-            "Russian readme": "ru"
+            "Russian readme": "ru",
+            "Vietnamese readme": "vi",
+            "Thai readme": "th",
+            "Hindi readme": "hi",
+            "Arabic readme": "ar",
+            "Turkish readme": "tr",
+            "Polish readme": "pl",
+            "Dutch readme": "nl",
+            "Swedish readme": "sv",
+            "Danish readme": "da",
+            "Norwegian readme": "no"
         }
         
         return json_key_map.get(json_key) 

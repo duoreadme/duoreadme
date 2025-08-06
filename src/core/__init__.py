@@ -1,7 +1,7 @@
 """
 核心功能模块
 
-包含翻译、解析和生成的核心逻辑。
+包含生成、解析和生成的核心逻辑。
 """
 
 from .translator import Translator
