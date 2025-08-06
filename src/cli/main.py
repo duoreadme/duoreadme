@@ -5,7 +5,7 @@
 """
 
 import click
-from .commands import gen_command, config_command
+from .commands import gen_command, config_command, trans_command
 
 
 @click.group()
@@ -21,6 +21,7 @@ def cli():
 
 # 添加所有子命令
 cli.add_command(gen_command, name="gen")
+cli.add_command(trans_command, name="trans")
 cli.add_command(config_command, name="config")
 
 

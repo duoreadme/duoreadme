@@ -175,7 +175,6 @@ ehthumbs.db
 Desktop.ini
 
 # Project specific
-docs/
 *.log
 config.yaml
 .env.local

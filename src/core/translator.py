@@ -61,6 +61,25 @@ class Translator:
             
             return response
     
+    def translate_text_only(self, text: str, languages: Optional[List[str]] = None) -> TranslationResponse:
+        """
+        纯文本翻译功能
+        
+        Args:
+            text: 要翻译的文本内容
+            languages: 目标语言列表
+            
+        Returns:
+            TranslationResponse: 翻译响应对象
+        """
+        # 构建纯翻译请求
+        request = self._build_text_translation_request(text, languages)
+        
+        # 执行翻译
+        response = self._execute_translation(request)
+        
+        return response
+    
     def _read_project_content(self, project_path: str) -> str:
         """
         读取项目文件内容，支持 .gitignore 过滤和智能压缩
@@ -126,6 +145,39 @@ class Translator:
             warning(f"⚠ 未找到其他可读取的文件")
         
         return content
+    
+    def _read_readme_file(self, project_path: str) -> str:
+        """
+        读取项目根目录下的README文件
+        
+        Args:
+            project_path: 项目路径
+            
+        Returns:
+            str: README文件内容，如果读取失败则返回空字符串
+        """
+        try:
+            project_path = Path(project_path)
+            readme_files = [
+                project_path / "README.md",
+                project_path / "readme.md",
+                project_path / "README.txt",
+                project_path / "readme.txt"
+            ]
+            
+            for readme_file in readme_files:
+                if readme_file.exists():
+                    content = readme_file.read_text(encoding="utf-8")
+                    debug(f"成功读取README文件: {readme_file}")
+                    return content
+            
+            # 如果没有找到README文件，返回空字符串
+            debug(f"在项目路径 {project_path} 中未找到README文件")
+            return ""
+            
+        except Exception as e:
+            error(f"读取README文件失败: {e}")
+            return ""
     
     def _select_important_files(self, files: List[Path], max_files: int = 2) -> List[Path]:
         """
@@ -727,3 +779,67 @@ class Translator:
             "yue": "粵語"
         }
         return language_map.get(lang_code, lang_code) 
+
+    def _build_text_translation_request(self, text: str, languages: Optional[List[str]] = None) -> TranslationRequest:
+        """
+        构建纯文本翻译请求
+        
+        Args:
+            text: 要翻译的文本内容
+            languages: 目标语言列表
+            
+        Returns:
+            TranslationRequest: 翻译请求对象
+        """
+        if languages is None:
+            # 从配置文件获取默认语言
+            config_languages = self.config.get("translation.default_languages", [])
+            if config_languages:
+                # 配置文件中的语言可能是语言名称，需要转换为语言代码
+                languages = [self._normalize_language_code(lang) for lang in config_languages]
+            else:
+                # 如果没有配置，使用默认的语言代码
+                languages = ["zh-Hans", "en", "ja"]
+        
+        print(f"目标语言: {languages}")
+        
+        # 将语言代码转换为语言名称
+        language_names = [self.get_language_name(lang) for lang in languages]
+        
+        # 构建语言列表字符串
+        languages_str = "、".join(language_names)
+        
+        # 构建工作流输入变量（不包含code_text参数）
+        workflow_variables = {
+            "language": languages_str
+        }
+        
+        # 构建简洁的prompt
+        prompt = f"""请将以下文本翻译成{languages_str}，格式：
+
+原文：{text}
+
+要求：每种语言生成完整翻译，保持原文格式和结构。
+
+格式：
+"""
+        
+        # 为每种语言添加简洁的格式说明
+        for lang in languages:
+            lang_name = self.get_language_name(lang)
+            if lang == "ja":
+                prompt += f"### 日本語\n[翻译内容]\n\n"
+            elif lang == "zh-Hans":
+                prompt += f"### 中文\n[翻译内容]\n\n"
+            elif lang == "en":
+                prompt += f"### English\n[翻译内容]\n\n"
+            else:
+                prompt += f"### {lang_name}\n[翻译内容]\n\n"
+        
+        return TranslationRequest(
+            content=prompt,
+            languages=languages,
+            bot_app_key=self.config.get("app.bot_app_key"),
+            visitor_biz_id=self.config.get("app.visitor_biz_id"),
+            additional_params={"workflow_variables": workflow_variables}
+        ) 

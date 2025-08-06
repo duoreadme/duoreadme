@@ -113,6 +113,116 @@ def run_translation_workflow(
 
 
 @click.command()
+@click.option('--project-path', default='.', help='项目路径，默认为当前目录')
+@click.option('--languages', help='要翻译的语言，用逗号分隔，如：zh-Hans,en,ja')
+@click.option('--config', help='配置文件路径')
+@click.option('--verbose', is_flag=True, help='显示详细输出')
+@click.option('--debug', 'debug_mode', is_flag=True, help='启用调试模式，输出 DEBUG 级别日志')
+def trans_command(project_path, languages, config, verbose, debug_mode):
+    """纯文本翻译功能 - 翻译项目根目录下的README文件"""
+    try:
+        # 根据 --debug 参数设置日志级别
+        if debug_mode:
+            enable_debug()
+            debug("调试模式已启用")
+        
+        # 加载配置
+        config_obj = Config(config)
+        debug(f"配置文件路径: {config}")
+        
+        # 验证配置
+        if not config_obj.validate():
+            click.echo("错误: 配置验证失败", err=True)
+            return
+        
+        # 创建核心组件
+        translator = Translator(config_obj)
+        parser_obj = Parser()
+        generator = Generator()
+        debug("核心组件初始化完成")
+        
+        # 显示开始信息
+        click.echo("=" * 50)
+        click.echo("开始纯文本翻译")
+        click.echo("=" * 50)
+        
+        # 处理语言参数
+        language_list = None
+        if languages:
+            language_list = [lang.strip() for lang in languages.split(',')]
+            debug(f"目标语言: {language_list}")
+        
+        # 执行翻译流程
+        run_text_translation_workflow(
+            translator=translator,
+            parser_obj=parser_obj,
+            generator=generator,
+            project_path=project_path,
+            languages=language_list,
+            verbose=verbose
+        )
+        
+        click.echo("\n翻译完成！")
+        
+    except Exception as e:
+        click.echo(f"❌ 翻译失败: {e}", err=True)
+        if verbose or debug_mode:
+            import traceback
+            traceback.print_exc()
+
+
+def run_text_translation_workflow(
+    translator: Translator,
+    parser_obj: Parser,
+    generator: Generator,
+    project_path: str,
+    languages: list = None,
+    verbose: bool = False
+):
+    """执行纯文本翻译工作流程"""
+    debug(f"开始翻译项目: {project_path}")
+    
+    # 读取项目根目录下的README文件
+    readme_content = translator._read_readme_file(project_path)
+    
+    if not readme_content:
+        click.echo("❌ 未找到README文件或读取失败", err=True)
+        return
+    
+    debug(f"成功读取README文件，长度: {len(readme_content)} 字符")
+    
+    # 执行纯文本翻译
+    translation_response = translator.translate_text_only(readme_content, languages)
+    
+    if not translation_response.success:
+        click.echo(f"❌ 翻译失败: {translation_response.error}", err=True)
+        debug(f"翻译失败详情: {translation_response.error}")
+        return
+    
+    debug("翻译响应处理完成")
+    
+    # 解析多语言README（与gen命令相同的处理方式）
+    parsed_readme = parser_obj.parse_multilingual_content(
+        translation_response.content, 
+        languages
+    )
+    debug("多语言内容解析完成")
+    
+    # 生成README文件（与gen命令相同的处理方式）
+    click.echo("\n正在生成README文件")
+    generation_result = generator.generate_readme_files(
+        parsed_readme, 
+        translation_response.raw_response
+    )
+    debug("README文件生成完成")
+    
+    # 生成总结报告（与gen命令相同的处理方式）
+    summary = generator.generate_summary(generation_result)
+    click.echo(summary)
+    debug("总结报告生成完成")
+
+
+@click.command()
 @click.option('--config', help='配置文件路径')
 @click.option('--debug', 'debug_mode', is_flag=True, help='启用调试模式，输出 DEBUG 级别日志')
 def config_command(config, debug_mode):

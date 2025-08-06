@@ -1,261 +1,292 @@
-# DuoReadme - 多语言 README 生成工具
+> This is the English README. For other language versions, please see the [docs](./docs) directory.
 
-DuoReadme 是一个强大的 CLI 工具，用于将项目代码和 README 自动翻译成多种语言并生成规范化的多语言文档。
+# DuoReadme - Multilingual README Generation Tool
 
-## 功能特性
+DuoReadme is a powerful CLI tool for automatically translating project code and README into multiple languages and generating standardized multilingual documentation.
 
-- **多语言支持**: 支持100+种语言，包括中文、英文、日文、韩文、法文、德文、西班牙文、意大利文、葡萄牙文、俄文等，完整语言列表请见[ISO Language Codes](./LANGUAGE.md)。
-- **智能解析**: 自动解析项目结构和代码内容
-- **批量处理**: 一键生成所有语言的 README 文档
-- **腾讯云集成**: 集成腾讯云智能体平台
-- **规范配置**: 采用通用项目规范，英文 README.md 放置在文件根目录下，其他语言的 README.md 放置在 docs 目录下。
+## Features
 
-## 安装
+- **Multilingual Support**: Supports 100+ languages including Chinese, English, Japanese, Korean, French, German, Spanish, Italian, Portuguese, Russian, etc. For the complete list of languages, please see [ISO Language Codes](./LANGUAGE.md).
+- **Smart Parsing**: Automatically parses project structure and code content.
+- **Batch Processing**: Generates README documents for all languages with one click.
+- **Tencent Cloud Integration**: Integrated with Tencent Cloud Intelligence Platform.
+- **Standard Configuration**: Uses common project standards, placing the English README.md in the root directory and other language README.md files in the docs directory.
+
+## Installation
 
 ```bash
-# 克隆项目
+# Clone the project
 git clone https://github.com/duoreadme/duoreadme.git
 cd duoreadme
-# 安装依赖
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-## 使用方法
+## Usage
 
-### 基本使用
+### Basic Usage
 
 ```bash
-# 查看所有可用命令
+# View all available commands
 python -m src.cli.main --help
 
-# 生成多语言README（自动应用 .gitignore 过滤）
+# Generate multilingual README (automatically applies .gitignore filtering)
 python -m src.cli.main gen
 
-# 指定项目路径生成
+# Specify project path to generate
 python -m src.cli.main gen --project-path ./myproject
 
-# 指定要翻译的语言
+# Specify languages to translate
 python -m src.cli.main gen --languages "zh-Hans,en,ja,ko,fr"
+
+# Pure text translation of README file
+python -m src.cli.main trans --languages "zh-Hans,en,ja"
 ```
 
-### 可用命令
+### Available Commands
 
-#### gen - 生成多语言README
+#### gen - Generate Multilingual README
 ```bash
-# 使用默认设置生成多语言README
+# Generate multilingual README using default settings
 python -m src.cli.main gen
 
-# 指定项目路径
+# Specify project path
 python -m src.cli.main gen --project-path ./myproject
 
-# 指定要翻译的语言
+# Specify languages to translate
 python -m src.cli.main gen --languages "zh-Hans,en,ja,ko,fr"
 
-# 显示详细输出
+# Show detailed output
 python -m src.cli.main gen --verbose
 
-# 启用调试模式（显示详细日志）
+# Enable debug mode (show detailed logs)
 python -m src.cli.main gen --debug
 ```
 
-**📝 关于 .gitignore 支持**
-
-翻译器会自动检测项目根目录下的 `.gitignore` 文件，并过滤掉被忽略的文件和目录。这确保只翻译项目中真正重要的源代码文件，避免处理临时文件、构建产物、依赖包等。
-
-- 如果项目有 `.gitignore` 文件，会自动应用过滤规则
-- 如果没有 `.gitignore` 文件，会读取所有文本文件
-- 支持标准的 `.gitignore` 语法（通配符、目录模式等）
-- 优先读取 `README.md` 文件，然后读取其他源代码文件
-
-**🔍 代码读取整体逻辑**
-
-DuoReadme 采用智能的项目内容读取策略，确保翻译的内容既全面又精准：
-
-### 1. 文件扫描策略
-```
-项目根目录
-├── README.md (优先读取)
-├── .gitignore (用于过滤)
-├── src/ (源代码目录)
-├── lib/ (库文件目录)
-├── docs/ (文档目录)
-└── 其他配置文件
-```
-
-### 2. 读取优先级
-1. **README.md** - 项目主要文档，优先读取并压缩处理
-2. **源代码文件** - 按重要性排序读取
-3. **配置文件** - 项目配置文件
-4. **文档文件** - 其他文档说明
-
-### 3. 内容处理流程
-
-#### 3.1 文件过滤
-- 自动应用 `.gitignore` 规则
-- 过滤二进制文件、临时文件、构建产物
-- 只处理文本文件（.md, .py, .js, .java, .cpp 等）
-
-#### 3.2 内容压缩
-- **README.md**: 压缩至 3000 字符，保留核心内容
-- **源代码文件**: 智能选择重要文件，每个文件压缩至 2000 字符
-- **总内容限制**: 单次翻译不超过 15KB，超长内容自动分批处理
-
-#### 3.3 智能选择
-- 优先选择包含主要逻辑的文件
-- 跳过测试文件、示例文件、临时文件
-- 保留关键的函数定义、类定义、注释说明
-
-### 4. 分批处理机制
-当项目内容超过 15KB 时，系统会自动分批处理：
-
-```
-内容分析 → 文件分组 → 分批翻译 → 结果合并
-```
-
-- **文件分组**: 按文件类型和重要性分组
-- **分批翻译**: 每批处理 15KB 内容
-- **结果合并**: 智能合并多批翻译结果
-
-### 5. 支持的文件类型
-- **文档文件**: `.md`, `.txt`, `.rst`
-- **源代码**: `.py`, `.js`, `.java`, `.cpp`, `.c`, `.go`, `.rs`
-- **配置文件**: `.yaml`, `.yml`, `.json`, `.toml`
-- **其他文本**: `.sql`, `.sh`, `.bat`
-
-### 6. 内容优化
-- 自动去除重复内容
-- 保留关键的结构信息
-- 智能压缩长文本，保持可读性
-- 优先保留注释和文档字符串
-
-
-
-#### config - 显示配置信息
+#### trans - Pure Text Translation
 ```bash
-# 显示当前配置
+# Translate README file using default settings
+python -m src.cli.main trans
+
+# Specify project path
+python -m src.cli.main trans --project-path ./myproject
+
+# Specify languages to translate
+python -m src.cli.main trans --languages "zh-Hans,en,ja,ko,fr"
+
+# Show detailed output
+python -m src.cli.main trans --verbose
+
+# Enable debug mode (show detailed logs)
+python -m src.cli.main trans --debug
+```
+
+**About trans Command**
+
+The `trans` command is a pure text translation feature that reads the README file from the project root directory and translates it into multiple languages. Unlike the `gen` command which processes the entire project structure, `trans` focuses solely on translating the README content.
+
+- Reads the README.md file from the project root directory
+- Translates the content into specified languages
+- Generates multilingual README files using the same parsing and generation logic as `gen`
+- Does not include the `code_text` parameter in API requests (pure text translation)
+- Supports all the same options as the `gen` command for consistency
+
+**About .gitignore Support**
+
+The translator automatically detects the `.gitignore` file in the project root directory and filters out ignored files and directories. This ensures that only the truly important source code files in the project are translated, avoiding temporary files, build artifacts, dependency packages, etc.
+
+- If the project has a `.gitignore` file, it will automatically apply the filtering rules.
+- If there is no `.gitignore` file, it will read all text files.
+- Supports standard `.gitignore` syntax (wildcards, directory patterns, etc.).
+- Prioritizes reading the `README.md` file, then reads other source code files.
+
+**🔍 Overall Code Reading Logic**
+
+DuoReadme adopts an intelligent project content reading strategy to ensure that the translated content is both comprehensive and accurate:
+
+### 1. File Scanning Strategy
+```
+Project Root Directory
+├── README.md (Priority Read)
+├── .gitignore (For Filtering)
+├── src/ (Source Code Directory)
+├── lib/ (Library Files Directory)
+├── docs/ (Documentation Directory)
+└── Other Configuration Files
+```
+
+### 2. Reading Priority
+1. **README.md** - Main project documentation, priority read and compressed processing
+2. **Source Code Files** - Read by importance
+3. **Configuration Files** - Project configuration files
+4. **Documentation Files** - Other documentation explanations
+
+### 3. Content Processing Workflow
+
+#### 3.1 File Filtering
+- Automatically apply `.gitignore` rules
+- Filter binary files, temporary files, build artifacts
+- Only process text files (.md, .py, .js, .java, .cpp, etc.)
+
+#### 3.2 Content Compression
+- **README.md**: Compressed to 3000 characters, retaining core content
+- **Source Code Files**: Intelligent selection of important files, each file compressed to 2000 characters
+- **Total Content Limit**: No more than 15KB per translation, long content automatically processed in batches
+
+#### 3.3 Intelligent Selection
+- Prioritize files containing main logic
+- Skip test files, sample files, temporary files
+- Retain key function definitions, class definitions, comments
+
+### 4. Batch Processing Mechanism
+When the project content exceeds 15KB, the system automatically processes in batches:
+
+```
+Content Analysis → File Grouping → Batch Translation → Result Merging
+```
+
+- **File Grouping**: Group by file type and importance
+- **Batch Translation**: Process 15KB of content per batch
+- **Result Merging**: Intelligently merge results from multiple batches
+
+### 5. Supported File Types
+- **Documentation Files**: `.md`, `.txt`, `.rst`
+- **Source Code**: `.py`, `.js`, `.java`, `.cpp`, `.c`, `.go`, `.rs`
+- **Configuration Files**: `.yaml`, `.yml`, `.json`, `.toml`
+- **Other Text**: `.sql`, `.sh`, `.bat`
+
+### 6. Content Optimization
+- Automatically remove duplicate content
+- Retain key structural information
+- Intelligent compression of long texts, maintaining readability
+- Prioritize retention of comments and documentation strings
+
+#### config - Display Configuration Information
+```bash
+# Display current configuration
 python -m src.cli.main config
 
-# 显示指定配置文件
+# Display specified configuration file
 python -m src.cli.main config --config ./my_config.yaml
 
-# 启用调试模式查看详细配置信息
+# Enable debug mode to view detailed configuration information
 python -m src.cli.main config --debug
 ```
 
-### 全局选项
+### Global Options
 
 ```bash
-# 显示版本信息
+# Display version information
 python -m src.cli.main --version
 
-# 显示帮助信息
+# Display help information
 python -m src.cli.main --help
 ```
 
-### 编程接口
+### Programming Interface
 
 ```python
 from src.core.translator import Translator
 from src.core.parser import Parser
 
-# 创建翻译器
+# Create translator
 translator = Translator()
 
-# 翻译项目内容
+# Translate project content
 result = translator.translate_project("./sample_project")
 
-# 解析多语言内容
+# Parse multilingual content
 parser = Parser()
 readme_dict = parser.parse_multilingual_content(result)
 ```
 
-## 配置
+## Configuration
 
-### 环境变量
+### Environment Variables
 
 ```bash
-# 腾讯云配置
+# Tencent Cloud Configuration
 export TENCENTCLOUD_SECRET_ID="your_secret_id"
 export TENCENTCLOUD_SECRET_KEY="your_secret_key"
-# 应用配置
+# Application Configuration
 export DUOREADME_BOT_APP_KEY="your_bot_app_key"
 ```
 
-### 配置文件
+### Configuration File
 
-创建 `config.yaml` 文件：
+Create `config.yaml` file:
 
 ```yaml
-# 腾讯云配置
+# Tencent Cloud Configuration
 tencent_cloud:
   secret_id: "your_secret_id"
   secret_key: "your_secret_key"
   region: "ap-beijing"
 
-# 翻译配置
+# Translation Configuration
 translation:
   default_languages:
-    # 常用语言（推荐）
-    - "zh-Hans"    # 中文 (简体)
+    # Common languages (recommended)
+    - "zh-Hans"    # Chinese (Simplified)
     - "en"         # English
-    - "ja"         # 日本語
-    - "ko"         # 한국어
-    - "fr"         # Français
-    - "de"         # Deutsch
-    - "es"         # Español
-    - "it"         # Italiano
-    - "pt"         # Português (Brasil)
-    - "ru"         # Русский
-    # 完整语言列表请参考 LANGUAGE.md
+    - "ja"         # Japanese
+    - "ko"         # Korean
+    - "fr"         # French
+    - "de"         # German
+    - "es"         # Spanish
+    - "it"         # Italian
+    - "pt"         # Portuguese (Brazil)
+    - "ru"         # Russian
+    # Complete list of languages refer to LANGUAGE.md
   batch_size: 5
   timeout: 30
 
-# 日志配置
+# Logging Configuration
 logging:
-  default_level: "INFO"  # 默认日志级别
-  debug_mode: false      # 是否启用调试模式
+  default_level: "INFO"  # Default log level
+  debug_mode: false      # Whether to enable debug mode
 ```
 
-## 日志
+## Logs
 
-DuoReadme 提供了完整的日志系统，帮助您了解翻译过程的详细情况：
+DuoReadme provides a complete logging system to help you understand the details of the translation process:
 
-### 日志级别
+### Log Levels
 
-- **DEBUG**: 详细的调试信息（仅在调试模式下显示）
-- **INFO**: 一般信息（默认显示）
-- **WARNING**: 警告信息
-- **ERROR**: 错误信息
-- **CRITICAL**: 严重错误信息
+- **DEBUG**: Detailed debugging information (only displayed in debug mode)
+- **INFO**: General information (default display)
+- **WARNING**: Warning information
+- **ERROR**: Error information
+- **CRITICAL**: Serious error information
 
-### 使用方式
+### Usage
 
-#### 默认模式
+#### Default Mode
 ```bash
-# 只显示 INFO 及以上级别的日志
+# Only show logs at INFO level and above
 python -m src.cli.main gen
 ```
 
-#### 调试模式
+#### Debug Mode
 ```bash
-# 显示所有级别的日志，包括详细的调试信息
+# Show all levels of logs, including detailed debugging information
 python -m src.cli.main gen --debug
 ```
 
-### 调试信息包括
-- 配置文件加载过程
-- 文件扫描和过滤详情
-- 翻译请求的详细信息
-- 内容压缩和分批处理过程
-- 文件生成和保存步骤
-- 错误和异常的详细信息
+#### Debug Information Includes
+- Configuration file loading process
+- File scanning and filtering details
+- Detailed information on translation requests
+- Content compression and batch processing process
+- File generation and saving steps
+- Detailed information on errors and exceptions
 
-## 测试
+## Testing
 
 ```bash
-# 运行所有测试
+# Run all tests
 python -m pytest tests/
 
-# 运行特定测试
+# Run specific test
 python -m pytest tests/test_translator.py
 ```
