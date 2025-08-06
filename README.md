@@ -1,4 +1,4 @@
-> This is the English README. For other language versions, please see the [docs](./docs) directory.
+> Homepage is English README. You can view the [简体中文](./docs/README.zh.md) | [日本語](./docs/README.ja.md) versions.
 
 # DuoReadme - Multilingual README Generation Tool
 
@@ -290,5 +290,3 @@ python -m pytest tests/
 # Run specific test
 python -m pytest tests/test_translator.py
 ```
-
-Requirements: Generate complete translation for each language, maintain original format and structure.

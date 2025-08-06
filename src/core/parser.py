@@ -122,21 +122,21 @@ class Parser:
                 if lang_code in languages:
                     results[lang_code] = content
                     found_languages.append(lang_code)
-                    debug(f"✅ Successfully parsed {lang_code} language content")
+                    debug(f"Successfully parsed {lang_code} language content")
             
             if results:
-                debug(f"✅ Successfully parsed {len(results)} languages")
+                debug(f"Successfully parsed {len(results)} languages")
                 return ParsedReadme(
                     content=results,
                     languages=found_languages,
                     total_count=len(results)
                 )
         else:
-            error("❌ Unable to extract JSON data")
-            debug(f"🔍 Original response text: {response_text[:200]}...")
+            error("Unable to extract JSON data")
+            debug(f"Original response text: {response_text[:200]}...")
         
         if not results:
-            warning("⚠️  Failed to parse multi-language README content")
+            warning("Failed to parse multi-language README content")
         
         return ParsedReadme(
             content=results,

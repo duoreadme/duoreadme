@@ -104,7 +104,7 @@ class TestGenerator:
         # Verify English file write call
         english_call = next(call for call in mock_write.call_args_list 
                           if call[0][0] == Path("README.md"))
-        expected_content = "> This is the English README. For other language versions, please see the [docs](./docs) directory.\n\n# Project README\n\n## Introduction\nThis is English content"
+        expected_content = "> This is the English README. You can view the [简体中文](./docs/README.zh.md) | [日本語](./docs/README.ja.md) versions.\n\n# Project README\n\n## Introduction\nThis is English content"
         assert english_call[0][1] == expected_content
         
         # Verify Chinese file write call
@@ -209,12 +209,12 @@ class TestGenerator:
         # Verify parsing results
         assert result.total_count == 3
         assert "en" in result.languages
-        assert "zh" in result.languages
+        assert "zh-Hans" in result.languages
         assert "ja" in result.languages
         
         # Verify content
         assert "# Project Overview" in result.content["en"]
-        assert "# 项目概述" in result.content["zh"]
+        assert "# 项目概述" in result.content["zh-Hans"]
         assert "# プロジェクト概要" in result.content["ja"]
     
     def test_json_key_mapping(self):

@@ -42,6 +42,9 @@ class Generator:
         saved_files = []
         failed_files = []
         
+        # Generate language links for English README
+        language_links = self._generate_language_links(parsed_readme.content.keys())
+        
         # Save README files for each language
         for lang, content in parsed_readme.content.items():
             try:
@@ -52,8 +55,8 @@ class Generator:
                     filename = "README.md"
                     filepath = Path(filename)
                     # Add multi-language note at the beginning of English README
-                    language_note = "> This is the English README. For other language versions, please see the [docs](./docs) directory.\n\n"
-                    content = language_note + content
+                    language_note = f"> Homepage is English README. You can view the {language_links} versions.\n\n"
+                    content = self._add_language_note_to_content(content, language_note)
                     debug("English README will be saved to root directory")
                 else:
                     # Other languages go in docs directory
@@ -247,6 +250,202 @@ class Generator:
         }
         
         return filename_map.get(language, f"README.{language.lower()}.md")
+    
+    def _generate_language_links(self, languages) -> str:
+        """
+        Generate language links for the English README header
+        
+        Args:
+            languages: List of language codes/names
+            
+        Returns:
+            str: Formatted language links string
+        """
+        links = []
+        for lang in languages:
+            if lang not in ["English", "en"]:
+                # Get the display name for the language
+                display_name = self._get_language_display_name(lang)
+                filename = self._get_filename_for_language(lang)
+                links.append(f"[{display_name}](./docs/{filename})")
+        
+        if len(links) == 1:
+            return links[0]
+        elif len(links) == 2:
+            return f"{links[0]} | {links[1]}"
+        else:
+            # For more than 2 languages, join with | separator
+            return " | ".join(links)
+    
+    def _get_language_display_name(self, language: str) -> str:
+        """
+        Get display name for language
+        
+        Args:
+            language: Language code or name
+            
+        Returns:
+            str: Display name for the language
+        """
+        display_names = {
+            "zh": "简体中文",
+            "zh-Hans": "简体中文", 
+            "zh-Hant": "繁體中文",
+            "ja": "日本語",
+            "ko": "한국어",
+            "fr": "Français",
+            "de": "Deutsch",
+            "es": "Español",
+            "it": "Italiano",
+            "pt": "Português",
+            "pt-PT": "Português (Portugal)",
+            "ru": "Русский",
+            "th": "ไทย",
+            "vi": "Tiếng Việt",
+            "hi": "हिन्दी",
+            "ar": "العربية",
+            "tr": "Türkçe",
+            "pl": "Polski",
+            "nl": "Nederlands",
+            "sv": "Svenska",
+            "da": "Dansk",
+            "no": "Norsk",
+            "nb": "Norsk Bokmål",
+            "fi": "Suomi",
+            "cs": "Čeština",
+            "sk": "Slovenčina",
+            "hu": "Magyar",
+            "ro": "Română",
+            "bg": "български",
+            "hr": "Hrvatski",
+            "sl": "Slovenščina",
+            "et": "Eesti",
+            "lv": "Latviešu",
+            "lt": "Lietuvių",
+            "mt": "Malti",
+            "el": "Ελληνικά",
+            "ca": "Català",
+            "eu": "Euskara",
+            "gl": "Galego",
+            "af": "Afrikaans",
+            "zu": "IsiZulu",
+            "xh": "isiXhosa",
+            "st": "Sesotho",
+            "sw": "Kiswahili",
+            "yo": "Èdè Yorùbá",
+            "ig": "Asụsụ Igbo",
+            "ha": "Hausa",
+            "am": "አማርኛ",
+            "or": "ଓଡ଼ିଆ",
+            "bn": "বাংলা",
+            "gu": "ગુજરાતી",
+            "pa": "ਪੰਜਾਬੀ",
+            "te": "తెలుగు",
+            "kn": "ಕನ್ನಡ",
+            "ml": "മലയാളം",
+            "ta": "தமிழ்",
+            "si": "සිංහල",
+            "my": "မြန်မာဘာသာ",
+            "km": "ភាសាខ្មែរ",
+            "lo": "ລາວ",
+            "ne": "नेपाली",
+            "ur": "اردو",
+            "fa": "فارسی",
+            "ps": "پښتو",
+            "sd": "سنڌي",
+            "he": "עברית",
+            "yue": "粵語",
+            # Language name mappings
+            "中文": "简体中文",
+            "繁體中文": "繁體中文",
+            "日本語": "日本語",
+            "한국어": "한국어",
+            "Français": "Français",
+            "Deutsch": "Deutsch",
+            "Español": "Español",
+            "Italiano": "Italiano",
+            "Português": "Português",
+            "Português (Portugal)": "Português (Portugal)",
+            "Русский": "Русский",
+            "Tiếng Việt": "Tiếng Việt",
+            "ไทย": "ไทย",
+            "हिन्दी": "हिन्दी",
+            "العربية": "العربية",
+            "Türkçe": "Türkçe",
+            "Polski": "Polski",
+            "Nederlands": "Nederlands",
+            "Svenska": "Svenska",
+            "Dansk": "Dansk",
+            "Norsk": "Norsk",
+            "Norsk Bokmål": "Norsk Bokmål",
+            "Suomi": "Suomi",
+            "Čeština": "Čeština",
+            "Slovenčina": "Slovenčina",
+            "Magyar": "Magyar",
+            "Română": "Română",
+            "български": "български",
+            "Hrvatski": "Hrvatski",
+            "Slovenščina": "Slovenščina",
+            "Eesti": "Eesti",
+            "Latviešu": "Latviešu",
+            "Lietuvių": "Lietuvių",
+            "Malti": "Malti",
+            "Ελληνικά": "Ελληνικά",
+            "Català": "Català",
+            "Euskara": "Euskara",
+            "Galego": "Galego",
+            "Afrikaans": "Afrikaans",
+            "IsiZulu": "IsiZulu",
+            "isiXhosa": "isiXhosa",
+            "Sesotho": "Sesotho",
+            "Kiswahili": "Kiswahili",
+            "Èdè Yorùbá": "Èdè Yorùbá",
+            "Asụsụ Igbo": "Asụsụ Igbo",
+            "Hausa": "Hausa",
+            "አማርኛ": "አማርኛ",
+            "ଓଡ଼ିଆ": "ଓଡ଼ିଆ",
+            "বাংলা": "বাংলা",
+            "ગુજરાતી": "ગુજરાતી",
+            "ਪੰਜਾਬੀ": "ਪੰਜਾਬੀ",
+            "తెలుగు": "తెలుగు",
+            "ಕನ್ನಡ": "ಕನ್ನಡ",
+            "മലയാളം": "മലയാളം",
+            "தமிழ்": "தமிழ்",
+            "සිංහල": "සිංහල",
+            "မြန်မာဘာသာ": "မြန်မာဘာသာ",
+            "ភាសាខ្មែរ": "ភាសាខ្មែរ",
+            "ລາວ": "ລາວ",
+            "नेपाली": "नेपाली",
+            "اردو": "اردو",
+            "فارسی": "فارسی",
+            "پښتو": "پښتو",
+            "سنڌي": "سنڌي",
+            "עברית": "עברית",
+            "粵語": "粵語"
+        }
+        return display_names.get(language, language)
+    
+    def _add_language_note_to_content(self, content: str, language_note: str) -> str:
+        """
+        Add language note to content, replacing existing opening lines if they start with >
+        
+        Args:
+            content: Original content
+            language_note: Language note to add
+            
+        Returns:
+            str: Content with language note added
+        """
+        lines = content.split('\n')
+        
+        # Check if the first line starts with >
+        if lines and lines[0].strip().startswith('>'):
+            # Replace the first line with our new language note
+            lines[0] = language_note.rstrip()
+            return '\n'.join(lines)
+        else:
+            # Add the language note at the beginning
+            return language_note + content
     
     def generate_summary(self, generation_result: GenerationResult) -> str:
         """
