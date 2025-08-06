@@ -165,11 +165,57 @@ class JSONExtractor:
         Returns:
             Dict[str, str]: 语言代码到内容的映射
         """
+        # 支持多种可能的键名格式
         language_map = {
+            # 标准语言代码
+            "zh-Hans": "zh-Hans",
+            "zh-Hant": "zh-Hant", 
+            "en": "en",
+            "ja": "ja",
+            "ko": "ko",
+            "fr": "fr",
+            "de": "de",
+            "es": "es",
+            "it": "it",
+            "pt": "pt",
+            "ru": "ru",
+            "th": "th",
+            "hi": "hi",
+            "ar": "ar",
+            "vi": "vi",
+            "tr": "tr",
+            "pl": "pl",
+            "nl": "nl",
+            "sv": "sv",
+            "da": "da",
+            "no": "no",
+            
+            # 语言名称（英文）
+            "English": "en",
+            "Chinese": "zh-Hans",
+            "Japanese": "ja",
+            "Korean": "ko",
+            "French": "fr",
+            "German": "de",
+            "Spanish": "es",
+            "Italian": "it",
+            "Portuguese": "pt",
+            "Russian": "ru",
+            "Thai": "th",
+            "Hindi": "hi",
+            "Arabic": "ar",
+            "Vietnamese": "vi",
+            "Turkish": "tr",
+            "Polish": "pl",
+            "Dutch": "nl",
+            "Swedish": "sv",
+            "Danish": "da",
+            "Norwegian": "no",
+            
+            # 带 "readme" 后缀的格式
             "English readme": "en",
-            "Chinese readme": "zh", 
+            "Chinese readme": "zh-Hans", 
             "Japanese readme": "ja",
-            "日本語 readme": "ja",
             "Korean readme": "ko",
             "French readme": "fr",
             "German readme": "de",
@@ -177,14 +223,53 @@ class JSONExtractor:
             "Italian readme": "it",
             "Portuguese readme": "pt",
             "Russian readme": "ru",
-            "Thai readme": "th"
+            "Thai readme": "th",
+            "Hindi readme": "hi",
+            "Arabic readme": "ar",
+            "Vietnamese readme": "vi",
+            "Turkish readme": "tr",
+            "Polish readme": "pl",
+            "Dutch readme": "nl",
+            "Swedish readme": "sv",
+            "Danish readme": "da",
+            "Norwegian readme": "no",
+            
+            # 其他可能的格式
+            "日本語 readme": "ja",
+            "中文 readme": "zh-Hans",
+            "한국어 readme": "ko",
+            "Français readme": "fr",
+            "Deutsch readme": "de",
+            "Español readme": "es",
+            "Italiano readme": "it",
+            "Português readme": "pt",
+            "Русский readme": "ru",
+            "ไทย readme": "th",
+            "हिन्दी readme": "hi",
+            "العربية readme": "ar",
+            "Tiếng Việt readme": "vi",
+            "Türkçe readme": "tr",
+            "Polski readme": "pl",
+            "Nederlands readme": "nl",
+            "Svenska readme": "sv",
+            "Dansk readme": "da",
+            "Norsk readme": "no"
         }
         
         results = {}
         for key, content in json_data.items():
+            # 尝试直接匹配键名
             lang_code = language_map.get(key)
             if lang_code and content and str(content).strip():
                 results[lang_code] = str(content).strip()
+                continue
+            
+            # 如果直接匹配失败，尝试标准化键名
+            normalized_key = key.strip().lower()
+            for map_key, map_value in language_map.items():
+                if normalized_key == map_key.lower():
+                    results[map_value] = str(content).strip()
+                    break
         
         return results
 
