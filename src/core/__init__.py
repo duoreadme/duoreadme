@@ -1,7 +1,7 @@
 """
-核心功能模块
+Core functionality module
 
-包含生成、解析和生成的核心逻辑。
+Contains the core logic for generation, parsing, and generation.
 """
 
 from .translator import Translator

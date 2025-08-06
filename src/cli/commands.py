@@ -1,7 +1,7 @@
 """
-CLI命令模块
+CLI commands module
 
-提供各种CLI命令的实现。
+Provides implementations for various CLI commands.
 """
 
 import click
@@ -14,44 +14,44 @@ from ..utils.logger import enable_debug, info, debug
 
 
 @click.command()
-@click.option('--project-path', default='.', help='项目路径，默认为当前目录')
-@click.option('--languages', help='要生成的语言，用逗号分隔，如：zh-Hans,en,ja')
-@click.option('--config', help='配置文件路径')
-@click.option('--verbose', is_flag=True, help='显示详细输出')
-@click.option('--debug', 'debug_mode', is_flag=True, help='启用调试模式，输出 DEBUG 级别日志')
+@click.option('--project-path', default='.', help='Project path, defaults to current directory')
+@click.option('--languages', help='Languages to generate, comma-separated, e.g.: zh-Hans,en,ja')
+@click.option('--config', help='Configuration file path')
+@click.option('--verbose', is_flag=True, help='Show detailed output')
+@click.option('--debug', 'debug_mode', is_flag=True, help='Enable debug mode, output DEBUG level logs')
 def gen_command(project_path, languages, config, verbose, debug_mode):
-    """生成多语言README"""
+    """Generate multi-language README"""
     try:
-        # 根据 --debug 参数设置日志级别
+        # Set log level based on --debug parameter
         if debug_mode:
             enable_debug()
-            debug("调试模式已启用")
+            debug("Debug mode enabled")
         
-        # 加载配置
+        # Load configuration
         config_obj = Config(config)
-        debug(f"配置文件路径: {config}")
+        debug(f"Configuration file path: {config}")
         
-        # 验证配置
+        # Validate configuration
         if not config_obj.validate():
-            click.echo("错误: 配置验证失败", err=True)
+            click.echo("Error: Configuration validation failed", err=True)
             return
         
-        # 创建核心组件
+        # Create core components
         translator = Translator(config_obj)
         parser_obj = Parser()
         generator = Generator()
-        debug("核心组件初始化完成")
+        debug("Core components initialized")
         
-        # 显示开始信息
+        # Display start information
         click.echo("=" * 50)
         
-        # 处理语言参数
+        # Process language parameters
         language_list = None
         if languages:
             language_list = [lang.strip() for lang in languages.split(',')]
-            debug(f"目标语言: {language_list}")
+            debug(f"Target languages: {language_list}")
         
-        # 执行生成流程
+        # Execute generation workflow
         run_translation_workflow(
             translator=translator,
             parser_obj=parser_obj,
@@ -61,10 +61,10 @@ def gen_command(project_path, languages, config, verbose, debug_mode):
             verbose=verbose
         )
         
-        click.echo("\n所有任务完成！")
+        click.echo("\nAll tasks completed!")
         
     except Exception as e:
-        click.echo(f"❌ 执行失败: {e}", err=True)
+        click.echo(f"❌ Execution failed: {e}", err=True)
         if verbose or debug_mode:
             import traceback
             traceback.print_exc()
@@ -78,81 +78,81 @@ def run_translation_workflow(
     languages: list = None,
     verbose: bool = False
 ):
-    """执行生成工作流程"""
-    debug(f"开始生成项目: {project_path}")
+    """Execute generation workflow"""
+    debug(f"Starting project generation: {project_path}")
     
-    # 生成项目内容
+    # Generate project content
     translation_response = translator.translate_project(project_path, languages)
     
     if not translation_response.success:
-        click.echo(f"❌ 生成失败: {translation_response.error}", err=True)
-        debug(f"生成失败详情: {translation_response.error}")
+        click.echo(f"❌ Generation failed: {translation_response.error}", err=True)
+        debug(f"Generation failure details: {translation_response.error}")
         return
     
-    debug("生成响应处理完成")
+    debug("Generation response processing completed")
     
-    # 解析多语言README
+    # Parse multi-language README
     parsed_readme = parser_obj.parse_multilingual_content(
         translation_response.content, 
         languages
     )
-    debug("多语言内容解析完成")
+    debug("Multi-language content parsing completed")
     
-    # 生成README文件
-    click.echo("\n正在生成README文件")
+    # Generate README files
+    click.echo("\nGenerating README files")
     generation_result = generator.generate_readme_files(
         parsed_readme, 
         translation_response.raw_response
     )
-    debug("README文件生成完成")
+    debug("README file generation completed")
     
-    # 生成总结报告
+    # Generate summary report
     summary = generator.generate_summary(generation_result)
     click.echo(summary)
-    debug("总结报告生成完成")
+    debug("Summary report generation completed")
 
 
 @click.command()
-@click.option('--project-path', default='.', help='项目路径，默认为当前目录')
-@click.option('--languages', help='要翻译的语言，用逗号分隔，如：zh-Hans,en,ja')
-@click.option('--config', help='配置文件路径')
-@click.option('--verbose', is_flag=True, help='显示详细输出')
-@click.option('--debug', 'debug_mode', is_flag=True, help='启用调试模式，输出 DEBUG 级别日志')
+@click.option('--project-path', default='.', help='Project path, defaults to current directory')
+@click.option('--languages', help='Languages to translate, comma-separated, e.g.: zh-Hans,en,ja')
+@click.option('--config', help='Configuration file path')
+@click.option('--verbose', is_flag=True, help='Show detailed output')
+@click.option('--debug', 'debug_mode', is_flag=True, help='Enable debug mode, output DEBUG level logs')
 def trans_command(project_path, languages, config, verbose, debug_mode):
-    """纯文本翻译功能 - 翻译项目根目录下的README文件"""
+    """Pure text translation function - translate README file in project root directory"""
     try:
-        # 根据 --debug 参数设置日志级别
+        # Set log level based on --debug parameter
         if debug_mode:
             enable_debug()
-            debug("调试模式已启用")
+            debug("Debug mode enabled")
         
-        # 加载配置
+        # Load configuration
         config_obj = Config(config)
-        debug(f"配置文件路径: {config}")
+        debug(f"Configuration file path: {config}")
         
-        # 验证配置
+        # Validate configuration
         if not config_obj.validate():
-            click.echo("错误: 配置验证失败", err=True)
+            click.echo("Error: Configuration validation failed", err=True)
             return
         
-        # 创建核心组件
+        # Create core components
         translator = Translator(config_obj)
         parser_obj = Parser()
         generator = Generator()
-        debug("核心组件初始化完成")
+        debug("Core components initialized")
         
-        # 显示开始信息
+        # Display start information
         click.echo("=" * 50)
-        click.echo("开始纯文本翻译")
+        click.echo("Starting pure text translation")
         click.echo("=" * 50)
         
-        # 处理语言参数
+        # Process language parameters
         language_list = None
         if languages:
             language_list = [lang.strip() for lang in languages.split(',')]
-            debug(f"目标语言: {language_list}")
+            debug(f"Target languages: {language_list}")
         
-        # 执行翻译流程
+        # Execute translation workflow
         run_text_translation_workflow(
             translator=translator,
             parser_obj=parser_obj,
@@ -162,10 +162,10 @@ def trans_command(project_path, languages, config, verbose, debug_mode):
             verbose=verbose
         )
         
-        click.echo("\n翻译完成！")
+        click.echo("\nTranslation completed!")
         
     except Exception as e:
-        click.echo(f"❌ 翻译失败: {e}", err=True)
+        click.echo(f"❌ Translation failed: {e}", err=True)
         if verbose or debug_mode:
             import traceback
             traceback.print_exc()
@@ -179,79 +179,79 @@ def run_text_translation_workflow(
     languages: list = None,
     verbose: bool = False
 ):
-    """执行纯文本翻译工作流程"""
-    debug(f"开始翻译项目: {project_path}")
+    """Execute pure text translation workflow"""
+    debug(f"Starting project translation: {project_path}")
     
-    # 读取项目根目录下的README文件
+    # Read README file in project root directory
     readme_content = translator._read_readme_file(project_path)
     
     if not readme_content:
-        click.echo("❌ 未找到README文件或读取失败", err=True)
+        click.echo("❌ README file not found or read failed", err=True)
         return
     
-    debug(f"成功读取README文件，长度: {len(readme_content)} 字符")
+    debug(f"Successfully read README file, length: {len(readme_content)} characters")
     
-    # 执行纯文本翻译
+    # Execute pure text translation
     translation_response = translator.translate_text_only(readme_content, languages)
     
     if not translation_response.success:
-        click.echo(f"❌ 翻译失败: {translation_response.error}", err=True)
-        debug(f"翻译失败详情: {translation_response.error}")
+        click.echo(f"❌ Translation failed: {translation_response.error}", err=True)
+        debug(f"Translation failure details: {translation_response.error}")
         return
     
-    debug("翻译响应处理完成")
+    debug("Translation response processing completed")
     
-    # 解析多语言README（与gen命令相同的处理方式）
+    # Parse multi-language README (same processing as gen command)
     parsed_readme = parser_obj.parse_multilingual_content(
         translation_response.content, 
         languages
     )
-    debug("多语言内容解析完成")
+    debug("Multi-language content parsing completed")
     
-    # 生成README文件（与gen命令相同的处理方式）
-    click.echo("\n正在生成README文件")
+    # Generate README files (same processing as gen command)
+    click.echo("\nGenerating README files")
     generation_result = generator.generate_readme_files(
         parsed_readme, 
         translation_response.raw_response
     )
-    debug("README文件生成完成")
+    debug("README file generation completed")
     
-    # 生成总结报告（与gen命令相同的处理方式）
+    # Generate summary report (same processing as gen command)
     summary = generator.generate_summary(generation_result)
     click.echo(summary)
-    debug("总结报告生成完成")
+    debug("Summary report generation completed")
 
 
 @click.command()
-@click.option('--config', help='配置文件路径')
-@click.option('--debug', 'debug_mode', is_flag=True, help='启用调试模式，输出 DEBUG 级别日志')
+@click.option('--config', help='Configuration file path')
+@click.option('--debug', 'debug_mode', is_flag=True, help='Enable debug mode, output DEBUG level logs')
 def config_command(config, debug_mode):
-    """显示配置信息"""
+    """Display configuration information"""
     try:
-        # 根据 --debug 参数设置日志级别
+        # Set log level based on --debug parameter
         if debug_mode:
             enable_debug()
-            debug("调试模式已启用")
+            debug("Debug mode enabled")
         
         config_obj = Config(config)
-        debug(f"配置文件路径: {config}")
+        debug(f"Configuration file path: {config}")
         
-        click.echo("当前配置:")
+        click.echo("Current configuration:")
         click.echo("=" * 30)
         
         for section, values in config_obj.get_all().items():
             click.echo(f"\n[{section}]")
             for key, value in values.items():
                 if isinstance(value, str) and len(value) > 50:
-                    # 隐藏敏感信息
+                    # Hide sensitive information
                     display_value = value[:10] + "..." if key in ['secret_id', 'secret_key', 'bot_app_key'] else value
                 else:
                     display_value = value
                 click.echo(f"  {key}: {display_value}")
-                debug(f"配置项: [{section}].{key} = {display_value}")
+                debug(f"Configuration item: [{section}].{key} = {display_value}")
         
     except Exception as e:
-        click.echo(f"❌ 获取配置失败: {e}", err=True)
+        click.echo(f"❌ Failed to get configuration: {e}", err=True)
         if debug_mode:
             import traceback
             traceback.print_exc()

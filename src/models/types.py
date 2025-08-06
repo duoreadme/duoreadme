@@ -1,7 +1,7 @@
 """
-类型定义模块
+Type definition module
 
-定义项目中使用的所有数据结构和类型。
+Defines all data structures and types used in the project.
 """
 
 from dataclasses import dataclass
@@ -10,7 +10,7 @@ from typing import Dict, List, Optional, Any
 
 @dataclass
 class TranslationRequest:
-    """生成请求数据类"""
+    """Generation request data class"""
     content: str
     languages: List[str]
     bot_app_key: str
@@ -20,7 +20,7 @@ class TranslationRequest:
 
 @dataclass
 class TranslationResponse:
-    """生成响应数据类"""
+    """Generation response data class"""
     success: bool
     content: str = ""
     languages: List[str] = None
@@ -34,7 +34,7 @@ class TranslationResponse:
 
 @dataclass
 class ParsedReadme:
-    """解析后的README数据类"""
+    """Parsed README data class"""
     content: Dict[str, str]
     languages: List[str]
     total_count: int
@@ -42,7 +42,7 @@ class ParsedReadme:
 
 @dataclass
 class GenerationResult:
-    """生成结果数据类"""
+    """Generation result data class"""
     saved_files: List[Dict[str, Any]]
     failed_files: List[Dict[str, Any]]
     total_saved: int
@@ -51,7 +51,7 @@ class GenerationResult:
 
 @dataclass
 class Config:
-    """配置数据类"""
+    """Configuration data class"""
     bot_app_key: str = ""
     visitor_biz_id: str = ""
     tencent_secret_id: str = ""
@@ -68,7 +68,7 @@ class Config:
 
 @dataclass
 class FileInfo:
-    """文件信息数据类"""
+    """File information data class"""
     language: str
     filename: str
     filepath: str
@@ -79,7 +79,7 @@ class FileInfo:
 
 @dataclass
 class ProjectInfo:
-    """项目信息数据类"""
+    """Project information data class"""
     name: str
     path: str
     readme_path: Optional[str] = None

@@ -1,7 +1,7 @@
 """
-文档生成器模块
+Document generator module
 
-负责生成和保存多语言README文件。
+Responsible for generating and saving multi-language README files.
 """
 
 import os
@@ -13,53 +13,53 @@ from ..utils.logger import debug, info, warning, error
 
 
 class Generator:
-    """文档生成器类，负责生成和保存多语言README文件"""
+    """Document generator class, responsible for generating and saving multi-language README files"""
     
     def __init__(self):
         """
-        初始化生成器
+        Initialize generator
         """
         self.output_dir = Path("docs")
         self.file_utils = FileUtils()
-        debug("文档生成器初始化完成")
+        debug("Document generator initialized")
         
     def generate_readme_files(self, parsed_readme: ParsedReadme, raw_content: str = "") -> GenerationResult:
         """
-        生成多语言README文件
+        Generate multi-language README files
         
         Args:
-            parsed_readme: 解析后的README对象
-            raw_content: 原始响应内容（不再保存）
+            parsed_readme: Parsed README object
+            raw_content: Original response content (no longer saved)
             
         Returns:
-            GenerationResult: 生成结果对象
+            GenerationResult: Generation result object
         """
-        debug(f"开始生成多语言README文件，共 {len(parsed_readme.content)} 种语言")
+        debug(f"Starting to generate multi-language README files, {len(parsed_readme.content)} languages total")
         
-        # 确保输出目录存在
+        # Ensure output directory exists
         self._ensure_output_directory()
         
         saved_files = []
         failed_files = []
         
-        # 保存各语言的README文件
+        # Save README files for each language
         for lang, content in parsed_readme.content.items():
             try:
-                debug(f"正在生成 {lang} 语言的README文件")
+                debug(f"Generating README file for {lang} language")
                 
-                # 英文README放在根目录下
+                # English README goes in root directory
                 if lang == "English" or lang == "en":
                     filename = "README.md"
                     filepath = Path(filename)
-                    # 在英文README开头添加多语言说明
+                    # Add multi-language note at the beginning of English README
                     language_note = "> This is the English README. For other language versions, please see the [docs](./docs) directory.\n\n"
                     content = language_note + content
-                    debug("英文README将保存到根目录")
+                    debug("English README will be saved to root directory")
                 else:
-                    # 其他语言放在docs目录下
+                    # Other languages go in docs directory
                     filename = self._get_filename_for_language(lang)
                     filepath = self.output_dir / filename
-                    debug(f"{lang} README将保存到: {filepath}")
+                    debug(f"{lang} README will be saved to: {filepath}")
                 
                 self.file_utils.write_text_file(filepath, content)
                 saved_files.append({
@@ -68,19 +68,19 @@ class Generator:
                     "filepath": str(filepath),
                     "size": len(content)
                 })
-                debug(f"✅ 成功保存 {lang} README文件 ({len(content)} 字符)")
+                debug(f"✅ Successfully saved {lang} README file ({len(content)} characters)")
             except Exception as e:
                 failed_files.append({
                     "language": lang,
                     "filename": filename,
                     "error": str(e)
                 })
-                error(f"❌ 保存 {lang} README 失败: {e}")
-                debug(f"保存失败详情: {e}")
+                error(f"❌ Failed to save {lang} README: {e}")
+                debug(f"Save failure details: {e}")
         
 
         
-        debug(f"README文件生成完成: 成功 {len(saved_files)} 个，失败 {len(failed_files)} 个")
+        debug(f"README file generation completed: {len(saved_files)} successful, {len(failed_files)} failed")
         return GenerationResult(
             saved_files=saved_files,
             failed_files=failed_files,
@@ -89,29 +89,29 @@ class Generator:
         )
     
     def _ensure_output_directory(self):
-        """确保输出目录存在"""
+        """Ensure output directory exists"""
         if not self.output_dir.exists():
             self.output_dir.mkdir(parents=True)
-            debug(f"创建输出目录: {self.output_dir}")
+            debug(f"Created output directory: {self.output_dir}")
         else:
-            debug(f"输出目录已存在: {self.output_dir}")
+            debug(f"Output directory already exists: {self.output_dir}")
     
     def _get_filename_for_language(self, language: str) -> str:
         """
-        获取指定语言对应的文件名
+        Get filename for specified language
         
         Args:
-            language: 语言名称
+            language: Language name
             
         Returns:
-            str: 对应的文件名
+            str: Corresponding filename
         """
         filename_map = {
-            # 语言名称映射
+            # Language name mapping
             "中文": "README.zh.md",
             "繁體中文": "README.zh-Hant.md",
-            "English": "README.md",  # 英文README放在根目录
-            "en": "README.md",       # 支持简写形式
+            "English": "README.md",  # English README goes in root directory
+            "en": "README.md",       # Support abbreviated form
             "日本語": "README.ja.md",
             "한국어": "README.ko.md",
             "Français": "README.fr.md",
@@ -176,7 +176,7 @@ class Generator:
             "سنڌي": "README.sd.md",
             "עברית": "README.he.md",
             "粵語": "README.yue.md",
-            # 语言代码映射
+            # Language code mapping
             "zh": "README.zh.md",
             "zh-Hans": "README.zh.md",
             "zh-Hant": "README.zh-Hant.md",
@@ -250,49 +250,49 @@ class Generator:
     
     def generate_summary(self, generation_result: GenerationResult) -> str:
         """
-        生成总结报告
+        Generate summary report
         
         Args:
-            generation_result: 生成结果对象
+            generation_result: Generation result object
             
         Returns:
-            str: 总结报告文本
+            str: Summary report text
         """
         summary_lines = [
             "=" * 60,
-            "项目生成和解析完成总结",
+            "Project generation and parsing completion summary",
             "=" * 60,
-            f"✓ {self.output_dir} 目录已创建",
-            "生成的文件:"
+            f"✓ {self.output_dir} directory created",
+            "Generated files:"
         ]
         
-        # 添加生成的文件信息
+        # Add generated file information
         for file_info in generation_result.saved_files:
             if file_info["language"] != "raw":
-                location = "根目录" if file_info["filename"] == "README.md" else f"{self.output_dir}目录"
+                location = "root directory" if file_info["filename"] == "README.md" else f"{self.output_dir} directory"
                 summary_lines.append(f"  - {file_info['filename']} ({file_info['size']} bytes) - {location}")
         
-        # 添加原始响应文件
+        # Add original response file
         raw_files = [f for f in generation_result.saved_files if f["language"] == "raw"]
         for file_info in raw_files:
             summary_lines.append(f"  - {file_info['filename']} ({file_info['size']} bytes)")
         
-        # 添加成功生成的语言列表
+        # Add successfully generated language list
         languages = [f["language"] for f in generation_result.saved_files if f["language"] != "raw"]
         if languages:
-            summary_lines.append(f"✓ 成功生成了 {len(languages)} 种语言的 README:")
+            summary_lines.append(f"✓ Successfully generated README in {len(languages)} languages:")
             for lang in languages:
                 summary_lines.append(f"  - {lang}")
         
-        # 添加失败信息
+        # Add failure information
         if generation_result.failed_files:
-            summary_lines.append("失败的文件:")
+            summary_lines.append("Failed files:")
             for file_info in generation_result.failed_files:
                 summary_lines.append(f"  - {file_info['filename']}: {file_info['error']}")
         
         summary_lines.extend([
             "=" * 60,
-            "任务完成！",
+            "Task completed!",
             "=" * 60
         ])
         
@@ -300,44 +300,44 @@ class Generator:
     
     def cleanup_old_files(self, keep_languages: Optional[List[str]] = None):
         """
-        清理旧的文件
+        Clean up old files
         
         Args:
-            keep_languages: 要保留的语言列表，如果为None则保留所有
+            keep_languages: List of languages to keep, if None then keep all
         """
         if keep_languages is None:
             return
         
-        # 获取要删除的文件
+        # Get files to delete
         files_to_delete = []
         for file_path in self.output_dir.glob("README.*.md"):
             lang = self._get_language_from_filename(file_path.name)
             if lang and lang not in keep_languages:
                 files_to_delete.append(file_path)
         
-        # 删除文件
+        # Delete files
         for file_path in files_to_delete:
             try:
                 file_path.unlink()
-                print(f"已删除旧文件: {file_path}")
+                print(f"Deleted old file: {file_path}")
             except Exception as e:
-                print(f"删除文件失败 {file_path}: {e}")
+                print(f"Failed to delete file {file_path}: {e}")
     
     def _get_language_from_filename(self, filename: str) -> Optional[str]:
         """
-        从文件名获取语言
+        Get language from filename
         
         Args:
-            filename: 文件名
+            filename: Filename
             
         Returns:
-            Optional[str]: 语言名称，如果无法识别则返回None
+            Optional[str]: Language name, returns None if unrecognizable
         """
         filename_map = {
-            "README.md": "English",      # 根目录的README.md是英文
+            "README.md": "English",      # README.md in root directory is English
             "README.zh.md": "中文",
             "README.zh-Hant.md": "繁體中文",
-            "README.en.md": "English",   # 兼容旧格式
+            "README.en.md": "English",   # Compatible with old format
             "README.ja.md": "日本語",
             "README.ko.md": "한국어",
             "README.fr.md": "Français",

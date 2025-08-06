@@ -1,7 +1,7 @@
 """
-生成核心模块
+Generation core module
 
-负责将项目内容生成多种语言。
+Responsible for generating project content in multiple languages.
 """
 
 import os
@@ -18,14 +18,14 @@ from ..utils.logger import debug, info, warning, error
 
 
 class Translator:
-    """生成器类，负责项目内容的生成"""
+    """Generator class, responsible for project content generation"""
     
     def __init__(self, config: Optional[Config] = None):
         """
-        初始化翻译器
+        Initialize translator
         
         Args:
-            config: 配置对象，如果为None则使用默认配置
+            config: Configuration object, if None then use default configuration
         """
         self.config = config or Config()
         self.tencent_service = TencentCloudService(self.config)
@@ -34,127 +34,127 @@ class Translator:
         
     def translate_project(self, project_path: str, languages: Optional[List[str]] = None) -> TranslationResponse:
         """
-        生成整个项目
+        Generate entire project
         
         Args:
-            project_path: 项目路径
-            languages: 要生成的语言列表，如果为None则使用默认语言
+            project_path: Project path
+            languages: List of languages to generate, if None then use default languages
             
         Returns:
-            TranslationResponse: 生成响应对象
+            TranslationResponse: Generation response object
         """
-        # 读取项目内容
+        # Read project content
         project_content = self._read_project_content(project_path)
         
-        # 检查内容长度，如果过长则分批处理
-        max_content_length = 15000  # 15KB限制
+        # Check content length, if too long then process in batches
+        max_content_length = 15000  # 15KB limit
         
         if len(project_content) > max_content_length:
-            warning(f"⚠ 内容过长 ({len(project_content)} 字符)，将分批处理")
+            warning(f"⚠ Content too long ({len(project_content)} characters), will process in batches")
             return self._translate_project_in_batches(project_content, languages, max_content_length)
         else:
-            # 构建生成请求
+            # Build generation request
             request = self._build_translation_request(project_content, languages)
             
-            # 执行生成
+            # Execute generation
             response = self._execute_translation(request)
             
             return response
     
     def translate_text_only(self, text: str, languages: Optional[List[str]] = None) -> TranslationResponse:
         """
-        纯文本翻译功能
+        Pure text translation function
         
         Args:
-            text: 要翻译的文本内容
-            languages: 目标语言列表
+            text: Text content to translate
+            languages: Target language list
             
         Returns:
-            TranslationResponse: 翻译响应对象
+            TranslationResponse: Translation response object
         """
-        # 构建纯翻译请求
+        # Build pure translation request
         request = self._build_text_translation_request(text, languages)
         
-        # 执行翻译
+        # Execute translation
         response = self._execute_translation(request)
         
         return response
     
     def _read_project_content(self, project_path: str) -> str:
         """
-        读取项目文件内容，支持 .gitignore 过滤和智能压缩
+        Read project file content, supports .gitignore filtering and intelligent compression
         
         Args:
-            project_path: 项目路径
+            project_path: Project path
             
         Returns:
-            str: 项目内容字符串
+            str: Project content string
         """
         content = ""
         project_path = Path(project_path)
         
-        # 检查是否存在 .gitignore 文件
+        # Check if .gitignore file exists
         gitignore_path = project_path / ".gitignore"
         if gitignore_path.exists():
-            debug(f"✓ 发现 .gitignore 文件，将过滤忽略的文件")
+            debug(f"✓ Found .gitignore file, will filter ignored files")
         else:
-            warning(f"⚠ 未发现 .gitignore 文件，将读取所有文本文件")
+            warning(f"⚠ No .gitignore file found, will read all text files")
         
-        # 获取项目文件列表（应用 .gitignore 过滤）
+        # Get project file list (apply .gitignore filtering)
         project_files = self.file_utils.get_project_files(project_path, include_gitignore=True)
         
-        # 优先读取 README.md
+        # Prioritize reading README.md
         readme_files = [f for f in project_files if f.name.lower() == "readme.md"]
         if readme_files:
             readme_path = readme_files[0]
             try:
                 readme_content = readme_path.read_text(encoding="utf-8")
-                # 压缩README内容，保留重要部分
+                # Compress README content, keep important parts
                 compressed_readme = self._compress_content(readme_content, max_length=3000)
                 content += "=== README.md ===\n"
                 content += compressed_readme
                 content += "\n\n"
-                debug(f"✓ 已读取并压缩 {readme_path.relative_to(project_path)} ({len(compressed_readme)} 字符)")
+                debug(f"✓ Read and compressed {readme_path.relative_to(project_path)} ({len(compressed_readme)} characters)")
             except Exception as e:
-                error(f"✗ 读取 README.md 失败: {e}")
+                error(f"✗ Failed to read README.md: {e}")
         else:
-            warning(f"⚠ 未找到 README.md")
+            warning(f"⚠ README.md not found")
         
-        # 智能选择最重要的文件
+        # Intelligently select the most important files
         other_files = [f for f in project_files if f.name.lower() != "readme.md"]
         important_files = self._select_important_files(other_files, max_files=2)
         
         if important_files:
-            debug(f"✓ 从 {len(other_files)} 个文件中选择了 {len(important_files)} 个重要文件")
+            debug(f"✓ Selected {len(important_files)} important files from {len(other_files)} files")
             
             for file_path in important_files:
                 try:
                     relative_path = file_path.relative_to(project_path)
                     file_content = file_path.read_text(encoding="utf-8")
                     
-                    # 智能压缩文件内容
+                    # Intelligently compress file content
                     compressed_content = self._compress_content(file_content, max_length=1500)
                     
                     content += f"=== {relative_path} ===\n"
                     content += compressed_content
                     content += "\n\n"
-                    debug(f"✓ 已读取并压缩 {relative_path} ({len(compressed_content)} 字符)")
+                    debug(f"✓ Read and compressed {relative_path} ({len(compressed_content)} characters)")
                 except Exception as e:
-                    error(f"✗ 读取 {file_path} 失败: {e}")
+                    error(f"✗ Failed to read {file_path}: {e}")
         else:
-            warning(f"⚠ 未找到其他可读取的文件")
+            warning(f"⚠ No other readable files found")
         
         return content
     
     def _read_readme_file(self, project_path: str) -> str:
         """
-        读取项目根目录下的README文件
+        Read README file in project root directory
         
         Args:
-            project_path: 项目路径
+            project_path: Project path
             
         Returns:
-            str: README文件内容，如果读取失败则返回空字符串
+            str: README file content, returns empty string if read fails
         """
         try:
             project_path = Path(project_path)
@@ -168,32 +168,32 @@ class Translator:
             for readme_file in readme_files:
                 if readme_file.exists():
                     content = readme_file.read_text(encoding="utf-8")
-                    debug(f"成功读取README文件: {readme_file}")
+                    debug(f"Successfully read README file: {readme_file}")
                     return content
             
-            # 如果没有找到README文件，返回空字符串
-            debug(f"在项目路径 {project_path} 中未找到README文件")
+            # If no README file found, return empty string
+            debug(f"No README file found in project path {project_path}")
             return ""
             
         except Exception as e:
-            error(f"读取README文件失败: {e}")
+            error(f"Failed to read README file: {e}")
             return ""
     
     def _select_important_files(self, files: List[Path], max_files: int = 2) -> List[Path]:
         """
-        智能选择最重要的文件
+        Intelligently select the most important files
         
         Args:
-            files: 文件列表
-            max_files: 最大文件数量
+            files: File list
+            max_files: Maximum number of files
             
         Returns:
-            List[Path]: 重要文件列表
+            List[Path]: List of important files
         """
         if not files:
             return []
         
-        # 定义文件重要性评分规则
+        # Define file importance scoring rules
         importance_scores = {}
         
         for file_path in files:
@@ -201,59 +201,59 @@ class Translator:
             file_name = file_path.name.lower()
             relative_path = str(file_path.relative_to(file_path.parents[-2] if len(file_path.parts) > 2 else file_path.parent))
             
-            # 核心文件得分最高
+            # Core files get highest score
             if any(keyword in file_name for keyword in ['main', 'core', 'translator', 'generator', 'parser']):
                 score += 100
             
-            # 配置文件得分较高
+            # Configuration files get higher score
             if any(keyword in file_name for keyword in ['config', 'settings', 'setup']):
                 score += 80
             
-            # 工具类文件得分中等
+            # Utility files get medium score
             if any(keyword in file_name for keyword in ['utils', 'helpers', 'tools']):
                 score += 60
             
-            # 模型文件得分中等
+            # Model files get medium score
             if any(keyword in file_name for keyword in ['models', 'types', 'schema']):
                 score += 50
             
-            # 服务文件得分中等
+            # Service files get medium score
             if any(keyword in file_name for keyword in ['services', 'api', 'client']):
                 score += 40
             
-            # CLI文件得分较低
+            # CLI files get lower score
             if any(keyword in file_name for keyword in ['cli', 'commands']):
                 score += 30
             
-            # 测试文件得分最低
+            # Test files get lowest score
             if any(keyword in file_name for keyword in ['test', 'spec']):
                 score += 10
             
-            # 路径深度影响得分（越浅越好）
+            # Path depth affects score (shallower is better)
             depth_penalty = len(file_path.parts) * 5
             score -= depth_penalty
             
             importance_scores[file_path] = score
         
-        # 按得分排序并返回前N个文件
+        # Sort by score and return top N files
         sorted_files = sorted(files, key=lambda f: importance_scores[f], reverse=True)
         return sorted_files[:max_files]
     
     def _compress_content(self, content: str, max_length: int = 2000) -> str:
         """
-        智能压缩内容，保留重要部分
+        Intelligently compress content, keep important parts
         
         Args:
-            content: 原始内容
-            max_length: 最大长度
+            content: Original content
+            max_length: Maximum length
             
         Returns:
-            str: 压缩后的内容
+            str: Compressed content
         """
         if len(content) <= max_length:
             return content
         
-        # 移除多余的空白行
+        # Remove excessive blank lines
         lines = content.split('\n')
         compressed_lines = []
         prev_empty = False
@@ -270,79 +270,79 @@ class Translator:
         if len(content) <= max_length:
             return content
         
-        # 如果还是太长，保留开头和结尾的重要部分
+        # If still too long, keep important parts from beginning and end
         if len(content) > max_length:
-            # 保留开头60%，结尾20%，中间20%用省略号
+            # Keep 60% from beginning, 20% from end, 20% in middle with ellipsis
             start_length = int(max_length * 0.6)
             end_length = int(max_length * 0.2)
             
             start_part = content[:start_length]
             end_part = content[-end_length:]
             
-            # 确保不截断单词
+            # Ensure not to truncate words
             if start_part and not start_part.endswith('\n'):
                 last_newline = start_part.rfind('\n')
-                if last_newline > start_length * 0.8:  # 如果离换行符不远，就截断到换行符
+                if last_newline > start_length * 0.8:  # If not far from newline, truncate to newline
                     start_part = start_part[:last_newline]
             
             if end_part and not end_part.startswith('\n'):
                 first_newline = end_part.find('\n')
-                if first_newline < end_length * 0.2:  # 如果离换行符不远，就从换行符开始
+                if first_newline < end_length * 0.2:  # If not far from newline, start from newline
                     end_part = end_part[first_newline:]
             
-            content = f"{start_part}\n\n... (内容已压缩) ...\n\n{end_part}"
+            content = f"{start_part}\n\n... (content compressed) ...\n\n{end_part}"
         
         return content
     
     def _translate_project_in_batches(self, project_content: str, languages: Optional[List[str]] = None, max_length: int = 30000) -> TranslationResponse:
         """
-        分批生成项目内容
+        Generate project content in batches
         
         Args:
-            project_content: 项目内容
-            languages: 目标语言列表
-            max_length: 每批最大长度
+            project_content: Project content
+            languages: Target language list
+            max_length: Maximum length per batch
             
         Returns:
-            TranslationResponse: 生成响应对象
+            TranslationResponse: Generation response object
         """
-        debug(f"📦 开始分批处理，总内容长度: {len(project_content)} 字符")
+        debug(f"📦 Starting batch processing, total content length: {len(project_content)} characters")
         
-        # 将内容按文件分割
+        # Split content by files
         content_parts = self._split_content_by_files(project_content)
         
         if not content_parts:
             return TranslationResponse(
                 success=False,
-                error="无法分割内容",
+                error="Unable to split content",
                 languages=languages or []
             )
         
-        debug(f"📦 内容已分割为 {len(content_parts)} 个部分")
+        debug(f"📦 Content split into {len(content_parts)} parts")
         
-        # 合并小部分，确保每批不超过限制
+        # Merge small parts, ensure each batch doesn't exceed limit
         batches = self._create_batches(content_parts, max_length)
         
-        debug(f"📦 将分 {len(batches)} 批处理")
+        debug(f"📦 Will process in {len(batches)} batches")
         
         all_responses = []
         
         for i, batch_content in enumerate(batches, 1):
-            debug(f"📦 处理第 {i}/{len(batches)} 批 (长度: {len(batch_content)} 字符)")
+            debug(f"📦 Processing batch {i}/{len(batches)} (length: {len(batch_content)} characters)")
             
-            # 构建批次请求
+            # Build batch request
             batch_request = self._build_batch_translation_request(batch_content, languages, i, len(batches))
             
-            # 执行生成
+            # Execute generation
             batch_response = self._execute_translation(batch_request)
             
             if not batch_response.success:
-                error(f"❌ 第 {i} 批生成失败: {batch_response.error}")
+                error(f"❌ Batch {i} generation failed: {batch_response.error}")
                 return batch_response
             
             all_responses.append(batch_response.content)
         
-        # 合并所有响应
+        # Merge all responses
         combined_response = self._combine_batch_responses(all_responses, languages)
         
         return TranslationResponse(
@@ -354,13 +354,13 @@ class Translator:
     
     def _split_content_by_files(self, content: str) -> List[str]:
         """
-        按文件分割内容
+        Split content by files
         
         Args:
-            content: 项目内容
+            content: Project content
             
         Returns:
-            List[str]: 分割后的内容部分
+            List[str]: Split content parts
         """
         parts = []
         current_part = ""
@@ -368,16 +368,16 @@ class Translator:
         lines = content.split('\n')
         
         for line in lines:
-            # 检查是否是文件分隔符
+            # Check if it's a file separator
             if line.startswith('===') and line.endswith('==='):
-                # 保存当前部分
+                # Save current part
                 if current_part.strip():
                     parts.append(current_part.strip())
                 current_part = line + '\n'
             else:
                 current_part += line + '\n'
         
-        # 添加最后一部分
+        # Add last part
         if current_part.strip():
             parts.append(current_part.strip())
         
@@ -385,20 +385,20 @@ class Translator:
     
     def _create_batches(self, content_parts: List[str], max_length: int) -> List[str]:
         """
-        创建批次，确保每批不超过长度限制
+        Create batches, ensure each batch doesn't exceed length limit
         
         Args:
-            content_parts: 内容部分列表
-            max_length: 每批最大长度
+            content_parts: Content parts list
+            max_length: Maximum length per batch
             
         Returns:
-            List[str]: 批次列表
+            List[str]: Batch list
         """
         batches = []
         current_batch = ""
         
         for part in content_parts:
-            # 如果当前批次加上新部分会超过限制，且当前批次不为空，则开始新批次
+            # If current batch plus new part would exceed limit, and current batch is not empty, start new batch
             if current_batch and len(current_batch + part) > max_length:
                 batches.append(current_batch.strip())
                 current_batch = part
@@ -408,7 +408,7 @@ class Translator:
                 else:
                     current_batch = part
         
-        # 添加最后一批
+        # Add last batch
         if current_batch.strip():
             batches.append(current_batch.strip())
         
@@ -416,53 +416,53 @@ class Translator:
     
     def _build_batch_translation_request(self, content: str, languages: Optional[List[str]] = None, batch_num: int = 1, total_batches: int = 1) -> TranslationRequest:
         """
-        构建批次生成请求
+        Build batch generation request
         
         Args:
-            content: 批次内容
-            languages: 目标语言列表
-            batch_num: 当前批次号
-            total_batches: 总批次数
+            content: Batch content
+            languages: Target language list
+            batch_num: Current batch number
+            total_batches: Total number of batches
             
         Returns:
-            TranslationRequest: 生成请求对象
+            TranslationRequest: Generation request object
         """
         if languages is None:
-            # 从配置文件获取默认语言
+            # Get default languages from configuration
             config_languages = self.config.get("translation.default_languages", [])
             if config_languages:
-                # 配置文件中的语言可能是语言名称，需要转换为语言代码
+                # Languages in configuration might be language names, need to convert to language codes
                 languages = [self._normalize_language_code(lang) for lang in config_languages]
             else:
-                # 如果没有配置，使用默认的语言代码
+                # If not configured, use default language codes
                 languages = ["zh", "en", "ja"]
         
-        # 将语言代码转换为语言名称
+        # Convert language codes to language names
         language_names = [self.get_language_name(lang) for lang in languages]
         languages_str = "、".join(language_names)
         
-        prompt = f"""这是项目内容的第 {batch_num}/{total_batches} 部分，请将以下项目代码和README生成多种语言的README文档，必须严格按照以下语言列表生成：{languages_str}。
+        prompt = f"""This is part {batch_num}/{total_batches} of the project content. Please generate multi-language README documents from the following project code and README, strictly following the language list: {languages_str}.
 
-项目内容（第 {batch_num}/{total_batches} 部分）：
+Project content (part {batch_num}/{total_batches}):
 {content}
 
-请严格按照以下格式为每种语言生成完整的README文档，包含项目介绍、功能说明、使用方法等。必须包含所有要求的语言，不能遗漏或替换：
+Please strictly follow the following format to generate complete README documents for each language, including project introduction, feature description, usage instructions, etc. Must include all required languages, cannot omit or replace:
 
 """
         
-        # 为每种语言添加格式说明
+        # Add format instructions for each language
         for lang in languages:
             lang_name = self.get_language_name(lang)
             if lang == "ja":
-                prompt += f"### 日本語\n[日本語README内容]\n\n"
+                prompt += f"### 日本語\n[Japanese README content]\n\n"
             elif lang == "zh":
-                prompt += f"### 中文\n[中文README内容]\n\n"
+                prompt += f"### 中文\n[Chinese README content]\n\n"
             elif lang == "en":
                 prompt += f"### English\n[English README content]\n\n"
             else:
-                prompt += f"### {lang_name}\n[{lang_name}README内容]\n\n"
+                prompt += f"### {lang_name}\n[{lang_name} README content]\n\n"
         
-        # 构建工作流输入变量
+        # Build workflow input variables
         workflow_variables = {
             "code_text": content,
             "language": languages_str
@@ -478,14 +478,14 @@ class Translator:
     
     def _combine_batch_responses(self, responses: List[str], languages: Optional[List[str]] = None) -> str:
         """
-        合并批次响应
+        Combine batch responses
         
         Args:
-            responses: 响应列表
-            languages: 语言列表
+            responses: Response list
+            languages: Language list
             
         Returns:
-            str: 合并后的响应
+            str: Combined response
         """
         if not responses:
             return ""
@@ -493,69 +493,69 @@ class Translator:
         if len(responses) == 1:
             return responses[0]
         
-        # 简单合并，保留最后一个完整响应
-        # 这里可以根据需要实现更复杂的合并逻辑
-        print(f"📦 合并 {len(responses)} 个批次响应")
+        # Simple merge, keep the last complete response
+        # More complex merge logic can be implemented here as needed
+        print(f"📦 Merging {len(responses)} batch responses")
         
-        # 返回最后一个响应，因为它通常是最完整的
+        # Return the last response, as it's usually the most complete
         return responses[-1]
     
     def _build_translation_request(self, content: str, languages: Optional[List[str]] = None) -> TranslationRequest:
         """
-        构建生成请求
+        Build generation request
         
         Args:
-            content: 要生成的内容
-            languages: 目标语言列表
+            content: Content to generate
+            languages: Target language list
             
         Returns:
-            TranslationRequest: 生成请求对象
+            TranslationRequest: Generation request object
         """
         if languages is None:
-            # 从配置文件获取默认语言
+            # Get default languages from configuration
             config_languages = self.config.get("translation.default_languages", [])
             if config_languages:
-                # 配置文件中的语言可能是语言名称，需要转换为语言代码
+                # Languages in configuration might be language names, need to convert to language codes
                 languages = [self._normalize_language_code(lang) for lang in config_languages]
             else:
-                # 如果没有配置，使用默认的语言代码
+                # If not configured, use default language codes
                 languages = ["zh", "en", "ja"]
         
-        print(f"目标语言: {languages}")
+        print(f"Target languages: {languages}")
         
-        # 将语言代码转换为语言名称
+        # Convert language codes to language names
         language_names = [self.get_language_name(lang) for lang in languages]
         
-        # 构建语言列表字符串
+        # Build language list string
         languages_str = "、".join(language_names)
         
-        # 构建工作流输入变量
+        # Build workflow input variables
         workflow_variables = {
             "code_text": content,
             "language": languages_str
         }
         
-        # 构建简洁的prompt
-        prompt = f"""生成项目为{languages_str}README，格式：
+        # Build concise prompt
+        prompt = f"""Generate project as {languages_str} README, format:
 
-项目：{content}
+Project: {content}
 
-要求：每种语言生成完整README，包含介绍、功能、使用方法。
+Requirements: Generate complete README for each language, including introduction, features, usage instructions.
 
-格式：
+Format:
 """
         
-        # 为每种语言添加简洁的格式说明
+        # Add concise format instructions for each language
         for lang in languages:
             lang_name = self.get_language_name(lang)
             if lang == "ja":
-                prompt += f"### 日本語\n[内容]\n\n"
+                prompt += f"### 日本語\n[Content]\n\n"
             elif lang == "zh":
-                prompt += f"### 中文\n[内容]\n\n"
+                prompt += f"### 中文\n[Content]\n\n"
             elif lang == "en":
-                prompt += f"### English\n[内容]\n\n"
+                prompt += f"### English\n[Content]\n\n"
             else:
-                prompt += f"### {lang_name}\n[内容]\n\n"
+                prompt += f"### {lang_name}\n[Content]\n\n"
         
         return TranslationRequest(
             content=prompt,
@@ -567,18 +567,18 @@ class Translator:
     
     def _execute_translation(self, request: TranslationRequest) -> TranslationResponse:
         """
-        执行生成
+        Execute generation
         
         Args:
-            request: 生成请求对象
+            request: Generation request object
             
         Returns:
-            TranslationResponse: 生成响应对象
+            TranslationResponse: Generation response object
         """
-        print("正在发送生成请求...")
+        print("Sending generation request...")
         
         try:
-            # 使用SSE客户端发送请求
+            # Use SSE client to send request
             response_text = self.sse_client.send_request(request)
             
             return TranslationResponse(
@@ -589,7 +589,7 @@ class Translator:
             )
             
         except Exception as e:
-            print(f"❌ 生成失败: {e}")
+            print(f"❌ Generation failed: {e}")
             return TranslationResponse(
                 success=False,
                 error=str(e),
@@ -598,10 +598,10 @@ class Translator:
     
     def get_supported_languages(self) -> List[str]:
         """
-        获取支持的语言列表
+        Get supported language list
         
         Returns:
-            List[str]: 支持的语言列表
+            List[str]: Supported language list
         """
         return [
             "zh-Hans", "zh-Hant", "en", "ja", "ko", "fr", "de", "es", "it", "pt", "pt-PT", "ru",
@@ -613,15 +613,15 @@ class Translator:
     
     def _normalize_language_code(self, lang: str) -> str:
         """
-        标准化语言代码，将语言名称转换为语言代码
+        Normalize language code, convert language names to language codes
         
         Args:
-            lang: 语言代码或语言名称
+            lang: Language code or language name
             
         Returns:
-            str: 标准化的语言代码
+            str: Normalized language code
         """
-        # 反向映射：语言名称 -> 语言代码
+        # Reverse mapping: language name -> language code
         reverse_language_map = {
             "中文": "zh-Hans",
             "繁體中文": "zh-Hant",
@@ -692,22 +692,22 @@ class Translator:
             "粵語": "yue"
         }
         
-        # 如果已经是语言代码，直接返回
+        # If already a language code, return directly
         if lang in ["zh-Hans", "zh-Hant", "en", "ja", "ko", "fr", "de", "es", "it", "pt", "pt-PT", "ru", "th", "vi", "hi", "ar", "tr", "pl", "nl", "sv", "da", "no", "nb", "fi", "cs", "sk", "hu", "ro", "bg", "hr", "sl", "et", "lv", "lt", "mt", "el", "ca", "eu", "gl", "af", "zu", "xh", "st", "sw", "yo", "ig", "ha", "am", "or", "bn", "gu", "pa", "te", "kn", "ml", "ta", "si", "my", "km", "lo", "ne", "ur", "fa", "ps", "sd", "he", "yue"]:
             return lang
         
-        # 如果是语言名称，转换为语言代码
+        # If it's a language name, convert to language code
         return reverse_language_map.get(lang, lang)
     
     def get_language_name(self, lang_code: str) -> str:
         """
-        获取语言代码对应的语言名称
+        Get language name corresponding to language code
         
         Args:
-            lang_code: 语言代码
+            lang_code: Language code
             
         Returns:
-            str: 语言名称
+            str: Language name
         """
         language_map = {
             "zh-Hans": "中文",
@@ -782,59 +782,59 @@ class Translator:
 
     def _build_text_translation_request(self, text: str, languages: Optional[List[str]] = None) -> TranslationRequest:
         """
-        构建纯文本翻译请求
+        Build pure text translation request
         
         Args:
-            text: 要翻译的文本内容
-            languages: 目标语言列表
+            text: Text content to translate
+            languages: Target language list
             
         Returns:
-            TranslationRequest: 翻译请求对象
+            TranslationRequest: Translation request object
         """
         if languages is None:
-            # 从配置文件获取默认语言
+            # Get default languages from configuration
             config_languages = self.config.get("translation.default_languages", [])
             if config_languages:
-                # 配置文件中的语言可能是语言名称，需要转换为语言代码
+                # Languages in configuration might be language names, need to convert to language codes
                 languages = [self._normalize_language_code(lang) for lang in config_languages]
             else:
-                # 如果没有配置，使用默认的语言代码
+                # If not configured, use default language codes
                 languages = ["zh-Hans", "en", "ja"]
         
-        print(f"目标语言: {languages}")
+        print(f"Target languages: {languages}")
         
-        # 将语言代码转换为语言名称
+        # Convert language codes to language names
         language_names = [self.get_language_name(lang) for lang in languages]
         
-        # 构建语言列表字符串
+        # Build language list string
         languages_str = "、".join(language_names)
         
-        # 构建工作流输入变量（不包含code_text参数）
+        # Build workflow input variables (without code_text parameter)
         workflow_variables = {
             "language": languages_str
         }
         
-        # 构建简洁的prompt
-        prompt = f"""请将以下文本翻译成{languages_str}，格式：
+        # Build concise prompt
+        prompt = f"""Please translate the following text into {languages_str}, format:
 
-原文：{text}
+Original text: {text}
 
-要求：每种语言生成完整翻译，保持原文格式和结构。
+Requirements: Generate complete translation for each language, maintain original format and structure.
 
-格式：
+Format:
 """
         
-        # 为每种语言添加简洁的格式说明
+        # Add concise format instructions for each language
         for lang in languages:
             lang_name = self.get_language_name(lang)
             if lang == "ja":
-                prompt += f"### 日本語\n[翻译内容]\n\n"
+                prompt += f"### 日本語\n[Translated content]\n\n"
             elif lang == "zh-Hans":
-                prompt += f"### 中文\n[翻译内容]\n\n"
+                prompt += f"### 中文\n[Translated content]\n\n"
             elif lang == "en":
-                prompt += f"### English\n[翻译内容]\n\n"
+                prompt += f"### English\n[Translated content]\n\n"
             else:
-                prompt += f"### {lang_name}\n[翻译内容]\n\n"
+                prompt += f"### {lang_name}\n[Translated content]\n\n"
         
         return TranslationRequest(
             content=prompt,

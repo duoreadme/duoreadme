@@ -1,7 +1,7 @@
 """
-JSON内容提取器
+JSON content extractor
 
-用于从各种响应格式中提取JSON内容。
+Used to extract JSON content from various response formats.
 """
 
 import re
@@ -10,33 +10,33 @@ from typing import Dict, Any, Optional, Tuple
 
 
 class JSONExtractor:
-    """JSON内容提取器类"""
+    """JSON content extractor class"""
     
     @staticmethod
     def extract_json_from_response(response_text: str) -> Optional[Dict[str, Any]]:
         """
-        从响应文本中提取JSON内容
+        Extract JSON content from response text
         
         Args:
-            response_text: 响应文本
+            response_text: Response text
             
         Returns:
-            Optional[Dict[str, Any]]: 提取的JSON数据，如果提取失败则返回None
+            Optional[Dict[str, Any]]: Extracted JSON data, returns None if extraction fails
         """
         if not response_text or not response_text.strip():
             return None
             
-        # 方法1: 尝试提取JSON代码块
+        # Method 1: Try to extract JSON code block
         json_data = JSONExtractor._extract_json_code_block(response_text)
         if json_data:
             return json_data
             
-        # 方法2: 尝试提取完整的JSON对象
+        # Method 2: Try to extract complete JSON object
         json_data = JSONExtractor._extract_complete_json_object(response_text)
         if json_data:
             return json_data
             
-        # 方法3: 尝试修复和解析不完整的JSON
+        # Method 3: Try to fix and parse incomplete JSON
         json_data = JSONExtractor._extract_and_fix_incomplete_json(response_text)
         if json_data:
             return json_data
@@ -45,19 +45,19 @@ class JSONExtractor:
     
     @staticmethod
     def _extract_json_code_block(response_text: str) -> Optional[Dict[str, Any]]:
-        """从代码块中提取JSON"""
+        """Extract JSON from code block"""
         try:
-            # 查找 ```json ... ``` 格式
+            # Find ```json ... ``` format
             json_match = re.search(r'```json\s*(.*?)\s*```', response_text, re.DOTALL)
             if json_match:
                 json_text = json_match.group(1).strip()
                 return json.loads(json_text)
                 
-            # 查找 ``` ... ``` 格式（可能是JSON）
+            # Find ``` ... ``` format (might be JSON)
             code_match = re.search(r'```\s*(.*?)\s*```', response_text, re.DOTALL)
             if code_match:
                 json_text = code_match.group(1).strip()
-                # 检查是否看起来像JSON
+                # Check if it looks like JSON
                 if json_text.startswith('{') and json_text.endswith('}'):
                     return json.loads(json_text)
         except (json.JSONDecodeError, AttributeError):
@@ -66,14 +66,14 @@ class JSONExtractor:
     
     @staticmethod
     def _extract_complete_json_object(response_text: str) -> Optional[Dict[str, Any]]:
-        """提取完整的JSON对象"""
+        """Extract complete JSON object"""
         try:
-            # 查找第一个 { 和最后一个 }
+            # Find first { and last }
             start = response_text.find('{')
             if start == -1:
                 return None
                 
-            # 找到匹配的结束括号
+            # Find matching closing brace
             brace_count = 0
             end = -1
             for i in range(start, len(response_text)):
@@ -87,7 +87,7 @@ class JSONExtractor:
             
             if end != -1:
                 json_text = response_text[start:end]
-                # 清理控制字符
+                # Clean control characters
                 json_text = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', json_text)
                 return json.loads(json_text)
         except (json.JSONDecodeError, IndexError):
@@ -96,19 +96,19 @@ class JSONExtractor:
     
     @staticmethod
     def _extract_and_fix_incomplete_json(response_text: str) -> Optional[Dict[str, Any]]:
-        """提取并修复不完整的JSON"""
+        """Extract and fix incomplete JSON"""
         try:
-            # 查找JSON开始位置
+            # Find JSON start position
             json_start = response_text.find('"English readme"')
             if json_start == -1:
                 return None
                 
-            # 向前查找对象开始
+            # Look backward for object start
             brace_start = response_text.rfind('{', 0, json_start)
             if brace_start == -1:
                 return None
                 
-            # 尝试找到匹配的结束括号
+            # Try to find matching closing brace
             brace_count = 0
             brace_end = -1
             for i in range(brace_start, len(response_text)):
@@ -121,11 +121,11 @@ class JSONExtractor:
                         break
             
             if brace_end == -1:
-                # 如果没有找到匹配的结束括号，尝试修复
+                # If no matching closing brace found, try to fix
                 return JSONExtractor._fix_truncated_json(response_text[brace_start:])
             
             json_text = response_text[brace_start:brace_end]
-            # 清理控制字符
+            # Clean control characters
             json_text = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', json_text)
             return json.loads(json_text)
             
@@ -134,20 +134,20 @@ class JSONExtractor:
     
     @staticmethod
     def _fix_truncated_json(json_text: str) -> Optional[Dict[str, Any]]:
-        """修复被截断的JSON"""
+        """Fix truncated JSON"""
         try:
-            # 清理控制字符
+            # Clean control characters
             json_text = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', json_text)
             
-            # 如果JSON被截断，尝试添加必要的结束部分
+            # If JSON is truncated, try to add necessary closing parts
             if not json_text.endswith('}'):
-                # 查找最后一个完整的键值对
+                # Find last complete key-value pair
                 last_comma = json_text.rfind(',')
                 if last_comma != -1:
-                    # 移除最后一个逗号并添加结束括号
+                    # Remove last comma and add closing brace
                     json_text = json_text[:last_comma] + '}'
                 else:
-                    # 如果没有逗号，直接添加结束括号
+                    # If no comma, directly add closing brace
                     json_text += '}'
             
             return json.loads(json_text)
@@ -157,17 +157,17 @@ class JSONExtractor:
     @staticmethod
     def extract_language_content(json_data: Dict[str, Any]) -> Dict[str, str]:
         """
-        从JSON数据中提取语言内容
+        Extract language content from JSON data
         
         Args:
-            json_data: JSON数据
+            json_data: JSON data
             
         Returns:
-            Dict[str, str]: 语言代码到内容的映射
+            Dict[str, str]: Language code to content mapping
         """
-        # 支持多种可能的键名格式
+        # Support multiple possible key name formats
         language_map = {
-            # 标准语言代码
+            # Standard language codes
             "zh-Hans": "zh-Hans",
             "zh-Hant": "zh-Hant", 
             "en": "en",
@@ -236,7 +236,7 @@ class JSONExtractor:
             "he": "he",
             "yue": "yue",
             
-            # 语言名称（英文）
+            # Language names (English)
             "English": "en",
             "Chinese": "zh-Hans",
             "Traditional Chinese": "zh-Hant",
@@ -305,7 +305,7 @@ class JSONExtractor:
             "Hebrew": "he",
             "Cantonese": "yue",
             
-            # 带 "readme" 后缀的格式
+            # Format with "readme" suffix
             "English readme": "en",
             "Chinese readme": "zh-Hans",
             "Traditional Chinese readme": "zh-Hant",
@@ -374,7 +374,7 @@ class JSONExtractor:
             "Hebrew readme": "he",
             "Cantonese readme": "yue",
             
-            # 其他可能的格式
+            # Other possible formats
             "日本語 readme": "ja",
             "中文 readme": "zh-Hans",
             "繁體中文 readme": "zh-Hant",
@@ -445,13 +445,13 @@ class JSONExtractor:
         
         results = {}
         for key, content in json_data.items():
-            # 尝试直接匹配键名
+            # Try direct key name matching
             lang_code = language_map.get(key)
             if lang_code and content and str(content).strip():
                 results[lang_code] = str(content).strip()
                 continue
             
-            # 如果直接匹配失败，尝试标准化键名
+            # If direct matching fails, try to normalize key name
             normalized_key = key.strip().lower()
             for map_key, map_value in language_map.items():
                 if normalized_key == map_key.lower():
@@ -463,13 +463,13 @@ class JSONExtractor:
 
 def extract_json_content(response_text: str) -> Tuple[Optional[Dict[str, Any]], Dict[str, str]]:
     """
-    从响应文本中提取JSON内容并解析语言内容
+    Extract JSON content from response text and parse language content
     
     Args:
-        response_text: 响应文本
+        response_text: Response text
         
     Returns:
-        Tuple[Optional[Dict[str, Any]], Dict[str, str]]: (JSON数据, 语言内容映射)
+        Tuple[Optional[Dict[str, Any]], Dict[str, str]]: (JSON data, language content mapping)
     """
     extractor = JSONExtractor()
     json_data = extractor.extract_json_from_response(response_text)

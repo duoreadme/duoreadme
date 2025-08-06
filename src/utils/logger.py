@@ -1,7 +1,7 @@
 """
-日志模块
+Logging module
 
-提供统一的日志配置和管理。
+Provides unified logging configuration and management.
 """
 
 import logging
@@ -10,7 +10,7 @@ from typing import Optional
 
 
 class Logger:
-    """日志管理器类"""
+    """Log manager class"""
     
     _instance = None
     _logger = None
@@ -25,52 +25,52 @@ class Logger:
             self._setup_logger()
     
     def _setup_logger(self):
-        """设置日志配置"""
-        # 创建logger
+        """Set up logging configuration"""
+        # Create logger
         self._logger = logging.getLogger('duoreadme')
-        # 默认设置为 INFO 级别，不输出 DEBUG 内容
+        # Default to INFO level, don't output DEBUG content
         self._logger.setLevel(logging.INFO)
         
-        # 清除现有的处理器
+        # Clear existing handlers
         self._logger.handlers.clear()
         
-        # 创建控制台处理器
+        # Create console handler
         console_handler = logging.StreamHandler(sys.stdout)
-        # 默认设置为 INFO 级别
+        # Default to INFO level
         console_handler.setLevel(logging.INFO)
         
-        # 创建格式化器
+        # Create formatter
         formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S'
         )
         console_handler.setFormatter(formatter)
         
-        # 添加处理器到logger
+        # Add handler to logger
         self._logger.addHandler(console_handler)
     
     def debug(self, message: str):
-        """输出DEBUG级别日志"""
+        """Output DEBUG level log"""
         self._logger.debug(message)
     
     def info(self, message: str):
-        """输出INFO级别日志"""
+        """Output INFO level log"""
         self._logger.info(message)
     
     def warning(self, message: str):
-        """输出WARNING级别日志"""
+        """Output WARNING level log"""
         self._logger.warning(message)
     
     def error(self, message: str):
-        """输出ERROR级别日志"""
+        """Output ERROR level log"""
         self._logger.error(message)
     
     def critical(self, message: str):
-        """输出CRITICAL级别日志"""
+        """Output CRITICAL level log"""
         self._logger.critical(message)
     
     def set_level(self, level: str):
-        """设置日志级别"""
+        """Set log level"""
         level_map = {
             'DEBUG': logging.DEBUG,
             'INFO': logging.INFO,
@@ -85,57 +85,57 @@ class Logger:
                 handler.setLevel(level_map[level.upper()])
     
     def enable_debug(self):
-        """启用调试模式，输出 DEBUG 级别日志"""
+        """Enable debug mode, output DEBUG level logs"""
         self.set_level('DEBUG')
     
     def disable_debug(self):
-        """禁用调试模式，只输出 INFO 及以上级别日志"""
+        """Disable debug mode, only output INFO and above level logs"""
         self.set_level('INFO')
     
     def get_logger(self) -> logging.Logger:
-        """获取原始logger对象"""
+        """Get original logger object"""
         return self._logger
 
 
-# 全局日志实例
+# Global log instance
 logger = Logger()
 
 
 def get_logger() -> Logger:
-    """获取日志实例"""
+    """Get log instance"""
     return logger
 
 
 def debug(message: str):
-    """输出DEBUG级别日志"""
+    """Output DEBUG level log"""
     logger.debug(message)
 
 
 def info(message: str):
-    """输出INFO级别日志"""
+    """Output INFO level log"""
     logger.info(message)
 
 
 def warning(message: str):
-    """输出WARNING级别日志"""
+    """Output WARNING level log"""
     logger.warning(message)
 
 
 def error(message: str):
-    """输出ERROR级别日志"""
+    """Output ERROR level log"""
     logger.error(message)
 
 
 def critical(message: str):
-    """输出CRITICAL级别日志"""
+    """Output CRITICAL level log"""
     logger.critical(message)
 
 
 def enable_debug():
-    """启用调试模式"""
+    """Enable debug mode"""
     logger.enable_debug()
 
 
 def disable_debug():
-    """禁用调试模式"""
+    """Disable debug mode"""
     logger.disable_debug() 

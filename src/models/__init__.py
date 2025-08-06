@@ -1,7 +1,7 @@
 """
-数据模型模块
+Data models module
 
-包含项目中使用的所有数据模型和类型定义。
+Contains all data models and type definitions used in the project.
 """
 
 from .types import (

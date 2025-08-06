@@ -104,7 +104,7 @@ The translator automatically detects the `.gitignore` file in the project root d
 
 DuoReadme adopts an intelligent project content reading strategy to ensure that the translated content is both comprehensive and accurate:
 
-### 1. File Scanning Strategy
+#### 1. File Scanning Strategy
 ```
 Project Root Directory
 ├── README.md (Priority Read)
@@ -115,30 +115,30 @@ Project Root Directory
 └── Other Configuration Files
 ```
 
-### 2. Reading Priority
+#### 2. Reading Priority
 1. **README.md** - Main project documentation, priority read and compressed processing
 2. **Source Code Files** - Read by importance
 3. **Configuration Files** - Project configuration files
 4. **Documentation Files** - Other documentation explanations
 
-### 3. Content Processing Workflow
+#### 3. Content Processing Workflow
 
-#### 3.1 File Filtering
+##### 3.1 File Filtering
 - Automatically apply `.gitignore` rules
 - Filter binary files, temporary files, build artifacts
 - Only process text files (.md, .py, .js, .java, .cpp, etc.)
 
-#### 3.2 Content Compression
+##### 3.2 Content Compression
 - **README.md**: Compressed to 3000 characters, retaining core content
 - **Source Code Files**: Intelligent selection of important files, each file compressed to 2000 characters
 - **Total Content Limit**: No more than 15KB per translation, long content automatically processed in batches
 
-#### 3.3 Intelligent Selection
+##### 3.3 Intelligent Selection
 - Prioritize files containing main logic
 - Skip test files, sample files, temporary files
 - Retain key function definitions, class definitions, comments
 
-### 4. Batch Processing Mechanism
+#### 4. Batch Processing Mechanism
 When the project content exceeds 15KB, the system automatically processes in batches:
 
 ```
@@ -149,13 +149,13 @@ Content Analysis → File Grouping → Batch Translation → Result Merging
 - **Batch Translation**: Process 15KB of content per batch
 - **Result Merging**: Intelligently merge results from multiple batches
 
-### 5. Supported File Types
+#### 5. Supported File Types
 - **Documentation Files**: `.md`, `.txt`, `.rst`
 - **Source Code**: `.py`, `.js`, `.java`, `.cpp`, `.c`, `.go`, `.rs`
 - **Configuration Files**: `.yaml`, `.yml`, `.json`, `.toml`
 - **Other Text**: `.sql`, `.sh`, `.bat`
 
-### 6. Content Optimization
+#### 6. Content Optimization
 - Automatically remove duplicate content
 - Retain key structural information
 - Intelligent compression of long texts, maintaining readability
@@ -173,7 +173,7 @@ python -m src.cli.main config --config ./my_config.yaml
 python -m src.cli.main config --debug
 ```
 
-### Global Options
+#### Global Options
 
 ```bash
 # Display version information
@@ -183,7 +183,7 @@ python -m src.cli.main --version
 python -m src.cli.main --help
 ```
 
-### Programming Interface
+#### Programming Interface
 
 ```python
 from src.core.translator import Translator
@@ -202,7 +202,7 @@ readme_dict = parser.parse_multilingual_content(result)
 
 ## Configuration
 
-### Environment Variables
+#### Environment Variables
 
 ```bash
 # Tencent Cloud Configuration
@@ -212,7 +212,7 @@ export TENCENTCLOUD_SECRET_KEY="your_secret_key"
 export DUOREADME_BOT_APP_KEY="your_bot_app_key"
 ```
 
-### Configuration File
+#### Configuration File
 
 Create `config.yaml` file:
 
@@ -251,7 +251,7 @@ logging:
 
 DuoReadme provides a complete logging system to help you understand the details of the translation process:
 
-### Log Levels
+#### Log Levels
 
 - **DEBUG**: Detailed debugging information (only displayed in debug mode)
 - **INFO**: General information (default display)
@@ -259,21 +259,21 @@ DuoReadme provides a complete logging system to help you understand the details 
 - **ERROR**: Error information
 - **CRITICAL**: Serious error information
 
-### Usage
+#### Usage
 
-#### Default Mode
+##### Default Mode
 ```bash
 # Only show logs at INFO level and above
 python -m src.cli.main gen
 ```
 
-#### Debug Mode
+##### Debug Mode
 ```bash
 # Show all levels of logs, including detailed debugging information
 python -m src.cli.main gen --debug
 ```
 
-#### Debug Information Includes
+##### Debug Information Includes
 - Configuration file loading process
 - File scanning and filtering details
 - Detailed information on translation requests
@@ -290,3 +290,5 @@ python -m pytest tests/
 # Run specific test
 python -m pytest tests/test_translator.py
 ```
+
+Requirements: Generate complete translation for each language, maintain original format and structure.

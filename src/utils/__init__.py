@@ -1,7 +1,7 @@
 """
-工具函数模块
+Utility functions module
 
-包含项目中使用的各种工具函数。
+Contains various utility functions used in the project.
 """
 
 from .config import Config

@@ -1,17 +1,17 @@
 """
-DuoReadme 安装配置
+DuoReadme Installation Configuration
 
-多语言 README 生成工具的安装配置文件。
+Installation configuration file for the multilingual README generation tool.
 """
 
 from setuptools import setup, find_packages
 from pathlib import Path
 
-# 读取README文件
+# Read README file
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text(encoding="utf-8")
 
-# 读取requirements.txt
+# Read requirements.txt
 requirements = []
 if (this_directory / "requirements.txt").exists():
     with open(this_directory / "requirements.txt", "r", encoding="utf-8") as f:
@@ -22,7 +22,7 @@ setup(
     version="1.0.0",
     author="DuoReadme Team",
     author_email="team@duoreadme.com",
-    description="一个强大的CLI工具，用于将项目代码和README自动生成多种语言并生成规范化的多语言文档",
+    description="A powerful CLI tool for automatically generating project code and README into multiple languages and creating standardized multilingual documentation",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/your-username/duoreadme",

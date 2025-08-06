@@ -1,7 +1,7 @@
 """
-内容解析器模块
+Content parser module
 
-负责解析生成响应中的多语言README内容。
+Responsible for parsing multi-language README content from generation responses.
 """
 
 import re
@@ -12,21 +12,21 @@ from ..utils.logger import debug, info, warning, error
 
 
 class Parser:
-    """解析器类，负责解析多语言README内容"""
+    """Parser class, responsible for parsing multi-language README content"""
     
     def __init__(self):
-        """初始化解析器"""
-        # 只保留JSON格式解析，移除正则表达式模式
+        """Initialize parser"""
+        # Only keep JSON format parsing, remove regex patterns
         self.language_patterns = {}
         
-        # 特殊处理泰语（AI可能生成"泰语版本readme:"）
+        # Special handling for Thai (AI might generate "Thai version readme:")
         self.language_patterns["th"] = []
         
         self.filename_map = {
             "zh": "README.zh.md",
             "zh-Hans": "README.zh.md",
             "zh-Hant": "README.zh-Hant.md",
-            "en": "README.md",      # 英文README放在根目录
+            "en": "README.md",      # English README goes in root directory
             "ja": "README.ja.md",
             "ko": "README.ko.md",
             "fr": "README.fr.md",
@@ -95,48 +95,48 @@ class Parser:
     
     def parse_multilingual_content(self, response_text: str, languages: Optional[List[str]] = None) -> ParsedReadme:
         """
-        解析多语言README内容
+        Parse multi-language README content
         
         Args:
-            response_text: 生成响应文本（JSON格式）
-            languages: 要解析的语言列表，如果为None则解析所有支持的语言
+            response_text: Generation response text (JSON format)
+            languages: List of languages to parse, if None then parse all supported languages
             
         Returns:
-            ParsedReadme: 解析结果对象
+            ParsedReadme: Parsing result object
         """
         if languages is None:
-            # 直接使用所有支持的语言代码
+            # Directly use all supported language codes
             languages = ["en", "zh-Hans", "zh-Hant", "ja", "ko", "fr", "de", "es", "it", "pt", "pt-PT", "ru", "th", "vi", "hi", "ar", "tr", "pl", "nl", "sv", "da", "no", "nb", "fi", "cs", "sk", "hu", "ro", "bg", "hr", "sl", "et", "lv", "lt", "mt", "el", "ca", "eu", "gl", "af", "zu", "xh", "st", "sw", "yo", "ig", "ha", "am", "or", "bn", "gu", "pa", "te", "kn", "ml", "ta", "si", "my", "km", "lo", "ne", "ur", "fa", "ps", "sd", "he", "yue", "zh-Hant"]
         
         results = {}
         found_languages = []
         
-        # 使用新的JSON提取器
+        # Use new JSON extractor
         json_data, language_content = extract_json_content(response_text)
         
         if json_data:
-            debug(f"🔍 成功提取JSON数据，包含 {len(json_data)} 个键")
+            debug(f"🔍 Successfully extracted JSON data, contains {len(json_data)} keys")
             
-            # 使用提取的语言内容
+            # Use extracted language content
             for lang_code, content in language_content.items():
                 if lang_code in languages:
                     results[lang_code] = content
                     found_languages.append(lang_code)
-                    debug(f"✅ 成功解析 {lang_code} 语言内容")
+                    debug(f"✅ Successfully parsed {lang_code} language content")
             
             if results:
-                debug(f"✅ 成功解析 {len(results)} 种语言")
+                debug(f"✅ Successfully parsed {len(results)} languages")
                 return ParsedReadme(
                     content=results,
                     languages=found_languages,
                     total_count=len(results)
                 )
         else:
-            error("❌ 无法提取JSON数据")
-            debug(f"🔍 原始响应文本: {response_text[:200]}...")
+            error("❌ Unable to extract JSON data")
+            debug(f"🔍 Original response text: {response_text[:200]}...")
         
         if not results:
-            warning("⚠️  未能解析到多语言 README 内容")
+            warning("⚠️  Failed to parse multi-language README content")
         
         return ParsedReadme(
             content=results,
@@ -146,36 +146,36 @@ class Parser:
     
     def get_filename_for_language(self, language: str) -> str:
         """
-        获取指定语言对应的文件名
+        Get filename for specified language
         
         Args:
-            language: 语言名称
+            language: Language name
             
         Returns:
-            str: 对应的文件名
+            str: Corresponding filename
         """
         return self.filename_map.get(language, f"README.{language.lower()}.md")
     
     def get_supported_languages(self) -> List[str]:
         """
-        获取支持解析的语言列表
+        Get list of supported languages for parsing
         
         Returns:
-            List[str]: 支持的语言列表
+            List[str]: List of supported languages
         """
         return list(self.language_patterns.keys())
     
     def validate_content(self, content: str) -> bool:
         """
-        验证内容是否包含有效的多语言README格式
+        Validate if content contains valid multi-language README format
         
         Args:
-            content: 要验证的内容
+            content: Content to validate
             
         Returns:
-            bool: 是否包含有效的多语言README格式
+            bool: Whether it contains valid multi-language README format
         """
-        # 检查是否包含至少一个语言标记
+        # Check if it contains at least one language marker
         for patterns in self.language_patterns.values():
             for pattern in patterns:
                 if re.search(pattern, content, re.DOTALL):
@@ -184,13 +184,13 @@ class Parser:
     
     def extract_language_sections(self, content: str) -> Dict[str, str]:
         """
-        提取所有语言部分的内容
+        Extract content from all language sections
         
         Args:
-            content: 要解析的内容
+            content: Content to parse
             
         Returns:
-            Dict[str, str]: 语言到内容的映射
+            Dict[str, str]: Language to content mapping
         """
         sections = {}
         
@@ -205,20 +205,20 @@ class Parser:
     
     def _map_json_key_to_language(self, json_key: str) -> Optional[str]:
         """
-        将JSON键映射到语言代码
+        Map JSON key to language code
         
         Args:
-            json_key: JSON中的键名
+            json_key: Key name in JSON
             
         Returns:
-            Optional[str]: 对应的语言代码，如果无法映射则返回None
+            Optional[str]: Corresponding language code, returns None if unable to map
         """
-        # JSON键到语言代码的映射
+        # JSON key to language code mapping
         json_key_map = {
             "English readme": "en",
             "Chinese readme": "zh", 
             "Japanese readme": "ja",
-            "日本語 readme": "ja",  # 添加日语变体
+            "日本語 readme": "ja",  # Add Japanese variant
             "Korean readme": "ko",
             "French readme": "fr",
             "German readme": "de",

@@ -1,10 +1,10 @@
 """
-语言代码映射模块
+Language code mapping module
 
-提供所有支持的语言代码和对应的语言名称映射。
+Provides mapping for all supported language codes and corresponding language names.
 """
 
-# 语言代码到语言名称的映射
+# Language code to language name mapping
 LANGUAGE_CODES = {
     "af": "Afrikaans",
     "am": "አማርኛ",
@@ -143,68 +143,68 @@ LANGUAGE_CODES = {
     "zu": "IsiZulu"
 }
 
-# 常用语言代码（推荐使用）
+# Common language codes (recommended for use)
 COMMON_LANGUAGES = [
-    "zh-Hans",  # 中文 (简体)
+    "zh-Hans",  # Chinese (Simplified)
     "en",       # English
-    "ja",       # 日本語
-    "ko",       # 한국어
-    "fr",       # Français
-    "de",       # Deutsch
-    "es",       # Español
-    "it",       # Italiano
-    "pt",       # Português (Brasil)
-    "ru",       # Русский
-    "ar",       # العربية
-    "hi",       # हिन्दी
-    "th",       # ไทย
-    "vi",       # Tiếng Việt
-    "tr",       # Türkçe
-    "pl",       # Polski
-    "nl",       # Nederlands
-    "sv",       # Svenska
-    "da",       # Dansk
-    "no"        # Norsk
+    "ja",       # Japanese
+    "ko",       # Korean
+    "fr",       # French
+    "de",       # German
+    "es",       # Spanish
+    "it",       # Italian
+    "pt",       # Portuguese (Brazil)
+    "ru",       # Russian
+    "ar",       # Arabic
+    "hi",       # Hindi
+    "th",       # Thai
+    "vi",       # Vietnamese
+    "tr",       # Turkish
+    "pl",       # Polish
+    "nl",       # Dutch
+    "sv",       # Swedish
+    "da",       # Danish
+    "no"        # Norwegian
 ]
 
 def get_language_name(code: str) -> str:
     """
-    获取语言代码对应的语言名称
+    Get language name corresponding to language code
     
     Args:
-        code: 语言代码
+        code: Language code
         
     Returns:
-        语言名称，如果代码不存在则返回代码本身
+        Language name, returns the code itself if code doesn't exist
     """
     return LANGUAGE_CODES.get(code, code)
 
 def get_all_language_codes() -> list:
     """
-    获取所有支持的语言代码
+    Get all supported language codes
     
     Returns:
-        语言代码列表
+        List of language codes
     """
     return list(LANGUAGE_CODES.keys())
 
 def get_common_language_codes() -> list:
     """
-    获取常用语言代码
+    Get common language codes
     
     Returns:
-        常用语言代码列表
+        List of common language codes
     """
     return COMMON_LANGUAGES.copy()
 
 def is_valid_language_code(code: str) -> bool:
     """
-    检查语言代码是否有效
+    Check if language code is valid
     
     Args:
-        code: 语言代码
+        code: Language code
         
     Returns:
-        是否有效
+        Whether it's valid
     """
     return code in LANGUAGE_CODES 

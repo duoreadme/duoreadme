@@ -1,7 +1,7 @@
 """
-主CLI入口模块
+Main CLI entry module
 
-提供命令行界面的主入口。
+Provides the main entry point for the command line interface.
 """
 
 import click
@@ -12,21 +12,21 @@ from .commands import gen_command, config_command, trans_command
 @click.version_option(version="1.0.0", prog_name="DuoReadme")
 def cli():
     """
-    DuoReadme - 多语言 README 生成工具
+    DuoReadme - Multi-language README generation tool
     
-    一个强大的CLI工具，用于将项目代码和README自动生成多种语言并生成规范化的多语言文档。
+    A powerful CLI tool for automatically generating multi-language README documents from project code and README files.
     """
     pass
 
 
-# 添加所有子命令
+# Add all subcommands
 cli.add_command(gen_command, name="gen")
 cli.add_command(trans_command, name="trans")
 cli.add_command(config_command, name="config")
 
 
 def main():
-    """主函数 - CLI入口点"""
+    """Main function - CLI entry point"""
     cli()
 
 

@@ -1,7 +1,7 @@
 """
-配置管理模块
+Configuration management module
 
-负责管理项目的配置信息。
+Responsible for managing project configuration information.
 """
 
 import os
@@ -11,23 +11,23 @@ from typing import Any, Dict, Optional
 
 
 class Config:
-    """配置管理类"""
+    """Configuration management class"""
     
     def __init__(self, config_file: Optional[str] = None):
         """
-        初始化配置管理器
+        Initialize configuration manager
         
         Args:
-            config_file: 配置文件路径，如果为None则尝试加载默认配置文件
+            config_file: Configuration file path, if None then try to load default configuration file
         """
         self.config_file = config_file
         self._config = self._load_default_config()
         
-        # 加载配置文件
+        # Load configuration file
         if config_file and Path(config_file).exists():
             self._load_config_file(config_file)
         else:
-            # 如果没有指定配置文件，尝试加载默认的配置文件
+            # If no configuration file specified, try to load default configuration file
             default_config_files = ["config.yaml", "config.yml", ".config.yaml"]
             for default_file in default_config_files:
                 if Path(default_file).exists():
@@ -35,11 +35,11 @@ class Config:
                     self.config_file = default_file
                     break
         
-        # 从环境变量加载配置
+        # Load configuration from environment variables
         self._load_from_env()
     
     def _load_default_config(self) -> Dict[str, Any]:
-        """加载默认配置"""
+        """Load default configuration"""
         return {
             "app": {
                 "bot_app_key": "",
@@ -66,16 +66,16 @@ class Config:
         }
     
     def _load_config_file(self, config_file: str):
-        """从配置文件加载配置"""
+        """Load configuration from configuration file"""
         try:
             with open(config_file, 'r', encoding='utf-8') as f:
                 file_config = yaml.safe_load(f)
                 self._merge_config(file_config)
         except Exception as e:
-            print(f"警告: 无法加载配置文件 {config_file}: {e}")
+            print(f"Warning: Unable to load configuration file {config_file}: {e}")
     
     def _load_from_env(self):
-        """从环境变量加载配置"""
+        """Load configuration from environment variables"""
         env_mappings = {
             "DUOREADME_BOT_APP_KEY": ("app.bot_app_key",),
             "DUOREADME_VISITOR_BIZ_ID": ("app.visitor_biz_id",),
@@ -92,7 +92,7 @@ class Config:
                 self.set_nested(config_path, value)
     
     def _merge_config(self, new_config: Dict[str, Any]):
-        """合并配置"""
+        """Merge configuration"""
         def merge_dict(base: Dict[str, Any], update: Dict[str, Any]):
             for key, value in update.items():
                 if key in base and isinstance(base[key], dict) and isinstance(value, dict):
@@ -104,14 +104,14 @@ class Config:
     
     def get(self, key: str, default: Any = None) -> Any:
         """
-        获取配置值
+        Get configuration value
         
         Args:
-            key: 配置键，支持点号分隔的嵌套键
-            default: 默认值
+            key: Configuration key, supports dot-separated nested keys
+            default: Default value
             
         Returns:
-            配置值
+            Configuration value
         """
         keys = key.split('.')
         value = self._config
@@ -125,49 +125,49 @@ class Config:
     
     def set(self, key: str, value: Any):
         """
-        设置配置值
+        Set configuration value
         
         Args:
-            key: 配置键，支持点号分隔的嵌套键
-            value: 配置值
+            key: Configuration key, supports dot-separated nested keys
+            value: Configuration value
         """
         keys = key.split('.')
         config = self._config
         
-        # 导航到父级
+        # Navigate to parent level
         for k in keys[:-1]:
             if k not in config:
                 config[k] = {}
             config = config[k]
         
-        # 设置值
+        # Set value
         config[keys[-1]] = value
     
     def set_nested(self, keys: tuple, value: Any):
         """
-        设置嵌套配置值
+        Set nested configuration value
         
         Args:
-            keys: 键的元组
-            value: 配置值
+            keys: Tuple of keys
+            value: Configuration value
         """
         config = self._config
         
-        # 导航到父级
+        # Navigate to parent level
         for key in keys[:-1]:
             if key not in config:
                 config[key] = {}
             config = config[key]
         
-        # 设置值
+        # Set value
         config[keys[-1]] = value
     
     def save(self, config_file: Optional[str] = None):
         """
-        保存配置到文件
+        Save configuration to file
         
         Args:
-            config_file: 配置文件路径，如果为None则使用初始化时的路径
+            config_file: Configuration file path, if None then use path from initialization
         """
         if config_file is None:
             config_file = self.config_file
@@ -176,25 +176,25 @@ class Config:
             try:
                 with open(config_file, 'w', encoding='utf-8') as f:
                     yaml.dump(self._config, f, default_flow_style=False, allow_unicode=True)
-                print(f"配置已保存到 {config_file}")
+                print(f"Configuration saved to {config_file}")
             except Exception as e:
-                print(f"保存配置失败: {e}")
+                print(f"Failed to save configuration: {e}")
     
     def get_all(self) -> Dict[str, Any]:
         """
-        获取所有配置
+        Get all configuration
         
         Returns:
-            所有配置的字典
+            Dictionary of all configuration
         """
         return self._config.copy()
     
     def validate(self) -> bool:
         """
-        验证配置的有效性
+        Validate configuration validity
         
         Returns:
-            配置是否有效
+            Whether configuration is valid
         """
         required_keys = [
             "app.bot_app_key",
@@ -208,10 +208,10 @@ class Config:
                 missing_keys.append(key)
         
         if missing_keys:
-            print("错误: 以下必需的配置项未正确设置:")
+            print("Error: The following required configuration items are not properly set:")
             for key in missing_keys:
                 print(f"  - {key}")
-            print("\n请编辑 config.yaml 文件并填入正确的配置值。")
+            print("\nPlease edit the config.yaml file and fill in the correct configuration values.")
             return False
         
         return True 

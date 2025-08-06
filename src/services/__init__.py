@@ -1,7 +1,7 @@
 """
-外部服务集成模块
+External service integration module
 
-包含与外部服务（如腾讯云、SSE等）的集成。
+Contains integrations with external services (such as Tencent Cloud, SSE, etc.).
 """
 
 from .tencent_cloud import TencentCloudService

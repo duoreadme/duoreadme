@@ -1,7 +1,7 @@
 """
-CLI工具模块
+CLI tools module
 
-提供命令行界面工具。
+Provides command line interface tools.
 """
 
 from .main import main, cli

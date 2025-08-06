@@ -1,7 +1,7 @@
 """
-DuoReadme - 多语言 README 生成工具
+DuoReadme - Multilingual README Generation Tool
 
-一个强大的CLI工具，用于将项目代码和README自动生成多种语言并生成规范化的多语言文档。
+A powerful CLI tool for automatically generating project code and README into multiple languages and creating standardized multilingual documentation.
 """
 
 __version__ = "1.0.0"
