@@ -13,7 +13,7 @@ tencent_cloud:
 translation:
   batch_size: 10
   default_languages:
+  - zh-Hans
   - en
   - ja
-  - ko
   timeout: 60
