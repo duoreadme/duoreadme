@@ -1,6 +1,17 @@
 > Homepage is English README. You can view the [简体中文](./docs/README.zh.md) | [日本語](./docs/README.ja.md) versions.
 
-# DuoReadme - Multilingual README Generation Tool
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/headerDark.svg" />
+    <img src="assets/headerLight.svg" alt="DuoReadme" />
+  </picture>
+
+[CI/CD Usage](#github-actions-integration) |
+[CLI Usage](#usage) |
+[API Usage](#programming-interface) |
+[Reporting Issues](https://github.com/duoreadme/duoreadme/issues/new/choose)
+
+</div>
 
 DuoReadme is a powerful CLI tool for automatically translating project code and README into multiple languages and generating standardized multilingual documentation.
 
