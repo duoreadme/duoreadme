@@ -1,31 +1,31 @@
-name: DuoReadme
+# name: DuoReadme
 
-on:
-  push:
-    branches: [ main ]
-    paths: [ 'README.md', 'docs/**' ]
-  workflow_dispatch:
+# on:
+#   push:
+#     branches: [ main ]
+#     paths: [ 'README.md', 'docs/**' ]
+#   workflow_dispatch:
 
-permissions:
-  contents: write
-  pull-requests: write
+# permissions:
+#   contents: write
+#   pull-requests: write
 
-jobs:
-  translate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GH_TOKEN }}
+# jobs:
+#   translate:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#         with:
+#           token: ${{ secrets.GH_TOKEN }}
 
-      - name: Translate with custom settings
-        uses: duoreadme/duoreadme@v0.1.2
-        with:
-          languages: "zh-Hans,en,ja" # You can specify multiple languages, separated by commas
-          translation_mode: "trans" # You can use 'gen' or 'trans' options.
-          commit_message: "Update multilingual documentation" # You can customize the commit message.
-          debug: "false" # You can enable debug mode to see detailed logs.
-        env:
-          TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENTCLOUD_SECRET_ID }}
-          TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENTCLOUD_SECRET_KEY }}
-          DUOREADME_BOT_APP_KEY: ${{ secrets.DUOREADME_BOT_APP_KEY }}
+#       - name: Translate with custom settings
+#         uses: duoreadme/duoreadme@v0.1.2
+#         with:
+#           languages: "zh-Hans,en,ja" # You can specify multiple languages, separated by commas
+#           translation_mode: "trans" # You can use 'gen' or 'trans' options.
+#           commit_message: "Update multilingual documentation" # You can customize the commit message.
+#           debug: "false" # You can enable debug mode to see detailed logs.
+#         env:
+#           TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENTCLOUD_SECRET_ID }}
+#           TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENTCLOUD_SECRET_KEY }}
+#           DUOREADME_BOT_APP_KEY: ${{ secrets.DUOREADME_BOT_APP_KEY }}
