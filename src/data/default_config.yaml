@@ -1,0 +1,19 @@
+app:
+  bot_app_key: test_bot_key_12345
+  visitor_biz_id: test_visitor_id
+sse:
+  streaming_throttle: 2
+  timeout: 120
+tencent_cloud:
+  api_version: '2023-11-30'
+  region: ap-beijing
+  secret_id: test_secret_id
+  secret_key: test_secret_key
+  service: lke
+translation:
+  batch_size: 10
+  default_languages:
+  - en
+  - ja
+  - ko
+  timeout: 60

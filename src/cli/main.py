@@ -5,7 +5,7 @@ Provides the main entry point for the command line interface.
 """
 
 import click
-from .commands import gen_command, config_command, trans_command
+from .commands import gen_command, config_command, trans_command, set_command, export_command
 
 
 @click.group()
@@ -23,6 +23,8 @@ def cli():
 cli.add_command(gen_command, name="gen")
 cli.add_command(trans_command, name="trans")
 cli.add_command(config_command, name="config")
+cli.add_command(set_command, name="set")
+cli.add_command(export_command, name="export")
 
 
 def main():

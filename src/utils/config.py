@@ -6,6 +6,7 @@ Responsible for managing project configuration information.
 
 import os
 import yaml
+import importlib.resources
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -18,28 +19,54 @@ class Config:
         Initialize configuration manager
         
         Args:
-            config_file: Configuration file path, if None then try to load default configuration file
+            config_file: Configuration file path, if None then load built-in configuration
         """
         self.config_file = config_file
-        self._config = self._load_default_config()
+        self._config = {}
         
-        # Load configuration file
+        # Load built-in configuration first
+        self._load_builtin_config()
+        
+        # Load external configuration file if specified
         if config_file and Path(config_file).exists():
             self._load_config_file(config_file)
-        else:
-            # If no configuration file specified, try to load default configuration file
-            default_config_files = ["config.yaml", "config.yml", ".config.yaml"]
-            for default_file in default_config_files:
-                if Path(default_file).exists():
-                    self._load_config_file(default_file)
-                    self.config_file = default_file
-                    break
         
-        # Load configuration from environment variables
+        # Load configuration from environment variables (highest priority)
         self._load_from_env()
     
-    def _load_default_config(self) -> Dict[str, Any]:
-        """Load default configuration"""
+    def update_builtin_config(self, new_config: Dict[str, Any]):
+        """
+        Update the built-in configuration with new values
+        
+        Args:
+            new_config: New configuration to merge with built-in config
+        """
+        self._merge_config(new_config)
+        # Save the updated configuration back to the built-in config file
+        self._save_builtin_config()
+    
+    def _save_builtin_config(self):
+        """Save current configuration to built-in config file"""
+        try:
+            builtin_config_path = importlib.resources.files("src.data").joinpath("default_config.yaml")
+            with builtin_config_path.open('w', encoding='utf-8') as f:
+                yaml.dump(self._config, f, default_flow_style=False, allow_unicode=True)
+        except Exception as e:
+            print(f"Warning: Unable to save built-in configuration: {e}")
+    
+    def _load_builtin_config(self):
+        """Load built-in configuration from package data"""
+        try:
+            with importlib.resources.files("src.data").joinpath("default_config.yaml").open('r', encoding='utf-8') as f:
+                builtin_config = yaml.safe_load(f)
+                self._config = builtin_config
+        except Exception as e:
+            # Fallback to hardcoded default configuration
+            print(f"Warning: Unable to load built-in configuration: {e}")
+            self._config = self._get_fallback_config()
+    
+    def _get_fallback_config(self) -> Dict[str, Any]:
+        """Get fallback configuration if built-in config cannot be loaded"""
         return {
             "app": {
                 "bot_app_key": "",
@@ -54,7 +81,7 @@ class Config:
             },
             "translation": {
                 "default_languages": [
-                    "af", "am", "ar", "as", "az", "ba", "bg", "bho", "bn", "bo", "brx", "bs", "ca", "cs", "cy", "da", "de", "doi", "dsb", "dv", "el", "en", "es", "et", "eu", "fa", "fi", "fil", "fj", "fo", "fr", "fr-CA", "ga", "gl", "gom", "gu", "ha", "he", "hi", "hne", "hr", "hsb", "ht", "hu", "hy", "id", "ig", "ikt", "is", "it", "iu", "iu-Latin", "ja", "ka", "kk", "km", "kmr", "kn", "ko", "ks", "ku", "ky", "ln", "lo", "lt", "lug", "lv", "lzh", "mai", "mg", "mi", "mk", "ml", "mn-Cyrl", "mn-Mong", "mni", "mr", "ms", "mt", "mww", "my", "nb", "ne", "nl", "nso", "nya", "or", "otq", "pa", "pl", "prs", "ps", "pt", "pt-PT", "ro", "ru", "run", "rw", "sd", "si", "sk", "sl", "sm", "sn", "so", "sq", "sr-Cyrl", "sr-Latin", "st", "sv", "sw", "ta", "te", "th", "ti", "tk", "tlh-Latin", "tlh-Piqd", "tn", "to", "tr", "tt", "ty", "ug", "uk", "ur", "uz", "vi", "xh", "yo", "yua", "yue", "zh-Hans", "zh-Hant", "zu"
+                    "zh-Hans", "en", "ja", "ko", "es", "fr", "de", "it", "pt", "ru"
                 ],
                 "batch_size": 5,
                 "timeout": 30
@@ -188,6 +215,24 @@ class Config:
             Dictionary of all configuration
         """
         return self._config.copy()
+    
+    def get_builtin_config_path(self) -> str:
+        """
+        Get built-in configuration file path
+        
+        Returns:
+            String path to built-in configuration file
+        """
+        return "src/data/default_config.yaml"
+    
+    def is_using_builtin_config(self) -> bool:
+        """
+        Check if currently using built-in configuration
+        
+        Returns:
+            True if using built-in configuration, False otherwise
+        """
+        return self.config_file is None
     
     def validate(self) -> bool:
         """

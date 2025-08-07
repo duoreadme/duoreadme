@@ -75,10 +75,11 @@ Repository = "https://github.com/duoreadme/duoreadme"
 duoreadme = "src.cli.main:main"
 
 [tool.setuptools]
-packages = ["src"]
+packages = ["src", "src.cli", "src.core", "src.models", "src.services", "src.utils", "src.data"]
 
 [tool.setuptools.package-data]
 "*" = ["*.md", "*.txt", "*.yaml", "*.yml"]
+"src.data" = ["*.yaml", "*.yml"]
 
 [tool.setuptools_scm]
 write_to = "src/_version.py"
