@@ -283,6 +283,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
       
       - name: Translate README
         uses: duoreadme/duoreadme@v0.1.1
@@ -308,6 +310,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
       
       - name: Translate with custom settings
         uses: duoreadme/duoreadme@v0.1.1
