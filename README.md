@@ -15,11 +15,7 @@ DuoReadme is a powerful CLI tool for automatically translating project code and 
 ## Installation
 
 ```bash
-# Clone the project
-git clone https://github.com/duoreadme/duoreadme.git
-cd duoreadme
-# Install dependencies
-pip install -r requirements.txt
+pip install duoreadme
 ```
 
 ## Usage
@@ -28,19 +24,19 @@ pip install -r requirements.txt
 
 ```bash
 # View all available commands
-python -m src.cli.main --help
+duoreadme --help
 
 # Generate multilingual README (automatically applies .gitignore filtering)
-python -m src.cli.main gen
+duoreadme gen
 
 # Specify project path to generate
-python -m src.cli.main gen --project-path ./myproject
+duoreadme gen --project-path ./myproject
 
 # Specify languages to translate
-python -m src.cli.main gen --languages "zh-Hans,en,ja,ko,fr"
+duoreadme gen --languages "zh-Hans,en,ja,ko,fr"
 
 # Pure text translation of README file
-python -m src.cli.main trans --languages "zh-Hans,en,ja"
+duoreadme trans --languages "zh-Hans,en,ja"
 ```
 
 ### Available Commands
@@ -48,37 +44,37 @@ python -m src.cli.main trans --languages "zh-Hans,en,ja"
 #### gen - Generate Multilingual README
 ```bash
 # Generate multilingual README using default settings
-python -m src.cli.main gen
+duoreadme gen
 
 # Specify project path
-python -m src.cli.main gen --project-path ./myproject
+duoreadme gen --project-path ./myproject
 
 # Specify languages to translate
-python -m src.cli.main gen --languages "zh-Hans,en,ja,ko,fr"
+duoreadme gen --languages "zh-Hans,en,ja,ko,fr"
 
 # Show detailed output
-python -m src.cli.main gen --verbose
+duoreadme gen --verbose
 
 # Enable debug mode (show detailed logs)
-python -m src.cli.main gen --debug
+duoreadme gen --debug
 ```
 
 #### trans - Pure Text Translation
 ```bash
 # Translate README file using default settings
-python -m src.cli.main trans
+duoreadme trans
 
 # Specify project path
-python -m src.cli.main trans --project-path ./myproject
+duoreadme trans --project-path ./myproject
 
 # Specify languages to translate
-python -m src.cli.main trans --languages "zh-Hans,en,ja,ko,fr"
+duoreadme trans --languages "zh-Hans,en,ja,ko,fr"
 
 # Show detailed output
-python -m src.cli.main trans --verbose
+duoreadme trans --verbose
 
 # Enable debug mode (show detailed logs)
-python -m src.cli.main trans --debug
+duoreadme trans --debug
 ```
 
 **About trans Command**
@@ -163,24 +159,33 @@ Content Analysis → File Grouping → Batch Translation → Result Merging
 
 #### config - Display Configuration Information
 ```bash
-# Display current configuration
-python -m src.cli.main config
-
-# Display specified configuration file
-python -m src.cli.main config --config ./my_config.yaml
+# Display current built-in configuration
+duoreadme config
 
 # Enable debug mode to view detailed configuration information
-python -m src.cli.main config --debug
+duoreadme config --debug
+```
+
+#### set - Update Built-in Configuration (Development Only)
+```bash
+# Apply a new configuration to the built-in config (for development/build only)
+duoreadme set my_config.yaml
+```
+
+#### export - Export Built-in Configuration
+```bash
+# Export the current built-in configuration
+duoreadme export -o exported_config.yaml
 ```
 
 #### Global Options
 
 ```bash
 # Display version information
-python -m src.cli.main --version
+duoreadme --version
 
 # Display help information
-python -m src.cli.main --help
+duoreadme --help
 ```
 
 #### Programming Interface
@@ -212,40 +217,9 @@ export TENCENTCLOUD_SECRET_KEY="your_secret_key"
 export DUOREADME_BOT_APP_KEY="your_bot_app_key"
 ```
 
-#### Configuration File
+#### Configuration File (for development/build only)
 
-Create `config.yaml` file:
-
-```yaml
-# Tencent Cloud Configuration
-tencent_cloud:
-  secret_id: "your_secret_id"
-  secret_key: "your_secret_key"
-  region: "ap-beijing"
-
-# Translation Configuration
-translation:
-  default_languages:
-    # Common languages (recommended)
-    - "zh-Hans"    # Chinese (Simplified)
-    - "en"         # English
-    - "ja"         # Japanese
-    - "ko"         # Korean
-    - "fr"         # French
-    - "de"         # German
-    - "es"         # Spanish
-    - "it"         # Italian
-    - "pt"         # Portuguese (Brazil)
-    - "ru"         # Russian
-    # Complete list of languages refer to LANGUAGE.md
-  batch_size: 5
-  timeout: 30
-
-# Logging Configuration
-logging:
-  default_level: "INFO"  # Default log level
-  debug_mode: false      # Whether to enable debug mode
-```
+You can check the [config.yaml.example](./config.yaml.example) file for the configuration file.
 
 ## Logs
 
@@ -261,16 +235,10 @@ DuoReadme provides a complete logging system to help you understand the details 
 
 #### Usage
 
-##### Default Mode
-```bash
-# Only show logs at INFO level and above
-python -m src.cli.main gen
-```
-
 ##### Debug Mode
 ```bash
 # Show all levels of logs, including detailed debugging information
-python -m src.cli.main gen --debug
+duoreadme gen --debug
 ```
 
 ##### Debug Information Includes
@@ -290,3 +258,5 @@ python -m pytest tests/
 # Run specific test
 python -m pytest tests/test_translator.py
 ```
+
+Requirements: Generate complete translation for each language, maintain original format and structure.
