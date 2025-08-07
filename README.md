@@ -310,7 +310,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Translate with custom settings
-        uses: duoreadme/duoreadme@v0.1.0
+        uses: duoreadme/duoreadme@v0.1.1
         with:
           languages: 'zh-Hans,en,ja' # You can specify multiple languages, separated by commas
           translation_mode: 'trans' # You can use 'gen' or 'trans' options.
