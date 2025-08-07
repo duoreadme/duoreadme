@@ -11,6 +11,7 @@ DuoReadme is a powerful CLI tool for automatically translating project code and 
 - **Batch Processing**: Generates README documents for all languages with one click.
 - **Tencent Cloud Integration**: Integrated with Tencent Cloud Intelligence Platform.
 - **Standard Configuration**: Uses common project standards, placing the English README.md in the root directory and other language README.md files in the docs directory.
+- **GitHub Actions Integration**: Automatically translate README files to multiple languages using GitHub Actions. You can refer to the [GitHub Actions Integration](#github-actions-integration) section for more details.
 
 ## Installation
 
@@ -248,6 +249,85 @@ duoreadme gen --debug
 - Content compression and batch processing process
 - File generation and saving steps
 - Detailed information on errors and exceptions
+
+## GitHub Actions Integration
+
+DuoReadme can be integrated into your GitHub repository using GitHub Actions for automated translation workflows.
+
+### Quick Setup
+
+1. **Configure Secrets**: Add required secrets to your repository:
+   ```
+   TENCENTCLOUD_SECRET_ID=your_secret_id
+   TENCENTCLOUD_SECRET_KEY=your_secret_key
+   DUOREADME_BOT_APP_KEY=your_bot_app_key
+   ```
+
+2. **Use the Action**: Add the action to your workflow file.
+
+### Basic Usage
+
+#### Simple Translation Workflow
+```yaml
+# .github/workflows/translate.yml
+name: Translate README
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'README.md' ]
+  workflow_dispatch:
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Translate README
+        uses: timerring/duoreadme@v1
+        env:
+          TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENTCLOUD_SECRET_ID }}
+          TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENTCLOUD_SECRET_KEY }}
+          DUOREADME_BOT_APP_KEY: ${{ secrets.DUOREADME_BOT_APP_KEY }}
+```
+
+#### Advanced Usage
+```yaml
+# .github/workflows/translate.yml
+name: Advanced Translation
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'README.md', 'docs/**' ]
+  workflow_dispatch:
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Translate with custom settings
+        uses: timerring/duoreadme-action@v1
+        with:
+          languages: 'zh-Hans,en,ja' # You can specify multiple languages, separated by commas
+          translation_mode: 'trans' # You can use 'gen' or 'trans' options.
+          commit_message: 'Update multilingual documentation' # You can customize the commit message.
+          debug: 'true' # You can enable debug mode to see detailed logs.
+        env:
+          TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENTCLOUD_SECRET_ID }}
+          TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENTCLOUD_SECRET_KEY }}
+          DUOREADME_BOT_APP_KEY: ${{ secrets.DUOREADME_BOT_APP_KEY }}
+```
+
+### Manual Trigger
+
+You can manually trigger the action from the GitHub Actions tab:
+1. Go to Actions → Translate README → Run workflow
+2. Optionally modify the parameters
+3. Click "Run workflow"
 
 ## Testing
 
