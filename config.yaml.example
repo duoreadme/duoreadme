@@ -2,13 +2,13 @@
 
 # Agent APP config
 app:
-  bot_app_key: "your_bot_app_key_here"
+  bot_app_key: "your_bot_app_key_here" # In your [application page](https://lke.cloud.tencent.com/lke#/app/home), select `调用` then find it in `appkey`.
   visitor_biz_id: "your_visitor_biz_id_here"
 
 # Tencent cloud config
 tencent_cloud:
-  secret_id: "your_secret_id_here"
-  secret_key: "your_secret_key_here"
+  secret_id: "your_secret_id_here" # Apply in [Tencent Cloud Console](https://console.cloud.tencent.com/cam/capi), select `新建密钥`。
+  secret_key: "your_secret_key_here" # Apply in [Tencent Cloud Console](https://console.cloud.tencent.com/cam/capi), select `新建密钥`。
   region: "ap-beijing"
   service: "lke"
   api_version: "2023-11-30"
