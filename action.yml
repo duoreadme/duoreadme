@@ -61,16 +61,20 @@ runs:
         
     - name: Create default config
       shell: bash
+      env:
+        TENCENTCLOUD_SECRET_ID: ${{ env.TENCENTCLOUD_SECRET_ID }}
+        TENCENTCLOUD_SECRET_KEY: ${{ env.TENCENTCLOUD_SECRET_KEY }}
+        DUOREADME_BOT_APP_KEY: ${{ env.DUOREADME_BOT_APP_KEY }}
       run: |
         echo "Creating default config with environment variables..."
         cat > custom_config.yaml << EOF
         app:
-          bot_app_key: "${{ env.DUOREADME_BOT_APP_KEY }}"
+          bot_app_key: "$DUOREADME_BOT_APP_KEY"
           visitor_biz_id: "github-action"
         
         tencent_cloud:
-          secret_id: "${{ env.TENCENTCLOUD_SECRET_ID }}"
-          secret_key: "${{ env.TENCENTCLOUD_SECRET_KEY }}"
+          secret_id: "$TENCENTCLOUD_SECRET_ID"
+          secret_key: "$TENCENTCLOUD_SECRET_KEY"
           region: "ap-beijing"
           service: "lke"
           api_version: "2023-11-30"
@@ -90,12 +94,20 @@ runs:
         
     - name: Apply configuration
       shell: bash
+      env:
+        TENCENTCLOUD_SECRET_ID: ${{ env.TENCENTCLOUD_SECRET_ID }}
+        TENCENTCLOUD_SECRET_KEY: ${{ env.TENCENTCLOUD_SECRET_KEY }}
+        DUOREADME_BOT_APP_KEY: ${{ env.DUOREADME_BOT_APP_KEY }}
       run: |
         duoreadme set custom_config.yaml
         
     - name: Run translation
       id: translate
       shell: bash
+      env:
+        TENCENTCLOUD_SECRET_ID: ${{ env.TENCENTCLOUD_SECRET_ID }}
+        TENCENTCLOUD_SECRET_KEY: ${{ env.TENCENTCLOUD_SECRET_KEY }}
+        DUOREADME_BOT_APP_KEY: ${{ env.DUOREADME_BOT_APP_KEY }}
       run: |
         set +e
         
@@ -109,6 +121,10 @@ runs:
         CMD="$CMD --verbose"
         
         echo "Running: $CMD"
+        echo "Environment variables:"
+        echo "TENCENTCLOUD_SECRET_ID: ${TENCENTCLOUD_SECRET_ID:0:10}..."
+        echo "TENCENTCLOUD_SECRET_KEY: ${TENCENTCLOUD_SECRET_KEY:0:10}..."
+        echo "DUOREADME_BOT_APP_KEY: ${DUOREADME_BOT_APP_KEY:0:10}..."
         
         # Execute translation
         $CMD
