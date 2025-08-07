@@ -1,0 +1,176 @@
+name: Test Local DuoReadme
+
+on:
+  workflow_dispatch:
+    inputs:
+      languages:
+        description: 'Languages to translate (comma-separated, e.g., zh-Hans,en,ja)'
+        required: false
+        default: 'zh-Hans,en,ja'
+      translation_mode:
+        description: 'Translation mode - gen (full project) or trans (README only)'
+        required: false
+        default: 'trans'
+      debug:
+        description: 'Enable debug mode for detailed logging'
+        required: false
+        default: 'true'
+
+jobs:
+  test-local:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          
+      - name: Install DuoReadme
+        run: |
+          pip install duoreadme
+          
+      - name: Configure environment
+        run: |
+          echo "Languages: ${{ github.event.inputs.languages }}"
+          echo "Translation mode: ${{ github.event.inputs.translation_mode }}"
+          echo "Debug mode: ${{ github.event.inputs.debug }}"
+          
+      - name: Create test config
+        run: |
+          echo "Creating test config with environment variables..."
+          cat > test_config.yaml << EOF
+          app:
+            bot_app_key: "${{ secrets.DUOREADME_BOT_APP_KEY }}"
+            visitor_biz_id: "test-local"
+          
+          tencent_cloud:
+            secret_id: "${{ secrets.TENCENTCLOUD_SECRET_ID }}"
+            secret_key: "${{ secrets.TENCENTCLOUD_SECRET_KEY }}"
+            region: "ap-beijing"
+            service: "lke"
+            api_version: "2023-11-30"
+          
+          translation:
+            default_languages:
+              - "zh-Hans"
+              - "en"
+              - "ja"
+            batch_size: 3
+            timeout: 60
+          
+          sse:
+            streaming_throttle: 2
+            timeout: 120
+          EOF
+          
+      - name: Apply test configuration
+        run: |
+          duoreadme set test_config.yaml
+          
+      - name: Export current configuration
+        run: |
+          duoreadme export -o current_config.yaml
+          echo "Current configuration:"
+          cat current_config.yaml
+          
+      - name: Test translation
+        id: test_translate
+        run: |
+          set +e
+          
+          # Prepare command
+          CMD="duoreadme ${{ github.event.inputs.translation_mode }} --languages ${{ github.event.inputs.languages }}"
+          
+          if [ "${{ github.event.inputs.debug }}" = "true" ]; then
+            CMD="$CMD --debug"
+          fi
+          
+          CMD="$CMD --verbose"
+          
+          echo "Running test command: $CMD"
+          
+          # Execute translation
+          $CMD
+          
+          # Capture results
+          if [ $? -eq 0 ]; then
+            echo "success=true" >> $GITHUB_OUTPUT
+            echo "languages_processed=${{ github.event.inputs.languages }}" >> $GITHUB_OUTPUT
+            
+            # List translated files
+            TRANSLATED_FILES=""
+            if [ -f "README.md" ]; then
+              TRANSLATED_FILES="README.md"
+            fi
+            
+            if [ -d "docs" ]; then
+              for file in docs/README.*.md; do
+                if [ -f "$file" ]; then
+                  if [ -n "$TRANSLATED_FILES" ]; then
+                    TRANSLATED_FILES="$TRANSLATED_FILES,$file"
+                  else
+                    TRANSLATED_FILES="$file"
+                  fi
+                fi
+              done
+            fi
+            
+            echo "translated_files=$TRANSLATED_FILES" >> $GITHUB_OUTPUT
+            echo "Test translation completed successfully"
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+            echo "Test translation failed"
+            exit 1
+          fi
+          
+      - name: Show test results
+        if: steps.test_translate.outputs.success == 'true'
+        run: |
+          echo "=== Test Results ==="
+          echo "Success: ${{ steps.test_translate.outputs.success }}"
+          echo "Languages processed: ${{ steps.test_translate.outputs.languages_processed }}"
+          echo "Translated files: ${{ steps.test_translate.outputs.translated_files }}"
+          
+          echo ""
+          echo "=== Generated Files ==="
+          if [ -f "README.md" ]; then
+            echo "README.md exists"
+            echo "First few lines of README.md:"
+            head -10 README.md
+          fi
+          
+          if [ -d "docs" ]; then
+            echo ""
+            echo "Files in docs/ directory:"
+            ls -la docs/
+            
+            for file in docs/README.*.md; do
+              if [ -f "$file" ]; then
+                echo ""
+                echo "Content of $file (first 5 lines):"
+                head -5 "$file"
+              fi
+            done
+          fi
+          
+      - name: Test commit (dry run)
+        if: steps.test_translate.outputs.success == 'true'
+        run: |
+          echo "=== Testing Git Operations (Dry Run) ==="
+          git status
+          echo ""
+          echo "Changes that would be committed:"
+          git diff --name-only
+          echo ""
+          echo "Note: This is a test run, no actual commit will be made"
+          
+      - name: Cleanup test files
+        run: |
+          rm -f test_config.yaml current_config.yaml
+          echo "Test files cleaned up" 

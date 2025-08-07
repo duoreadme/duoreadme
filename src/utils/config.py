@@ -104,13 +104,11 @@ class Config:
     def _load_from_env(self):
         """Load configuration from environment variables"""
         env_mappings = {
-            "DUOREADME_BOT_APP_KEY": ("app.bot_app_key",),
-            "DUOREADME_VISITOR_BIZ_ID": ("app.visitor_biz_id",),
-            "TENCENTCLOUD_SECRET_ID": ("tencent_cloud.secret_id",),
-            "TENCENTCLOUD_SECRET_KEY": ("tencent_cloud.secret_key",),
-            "TENCENTCLOUD_REGION": ("tencent_cloud.region",),
-
-
+            "DUOREADME_BOT_APP_KEY": ("app", "bot_app_key"),
+            "DUOREADME_VISITOR_BIZ_ID": ("app", "visitor_biz_id"),
+            "TENCENTCLOUD_SECRET_ID": ("tencent_cloud", "secret_id"),
+            "TENCENTCLOUD_SECRET_KEY": ("tencent_cloud", "secret_key"),
+            "TENCENTCLOUD_REGION": ("tencent_cloud", "region"),
         }
         
         for env_var, config_path in env_mappings.items():
@@ -249,7 +247,8 @@ class Config:
         missing_keys = []
         for key in required_keys:
             value = self.get(key)
-            if not value or value.startswith("your_") or value == "":
+            # Check if value is a string and has valid content
+            if not value or (isinstance(value, str) and (value.startswith("your_") or value == "")):
                 missing_keys.append(key)
         
         if missing_keys:
