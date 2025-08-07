@@ -19,10 +19,10 @@ if (this_directory / "requirements.txt").exists():
 
 setup(
     name="duoreadme",
-    version="1.0.0",
-    author="DuoReadme Team",
-    author_email="team@duoreadme.com",
-    description="A powerful CLI tool for automatically generating project code and README into multiple languages and creating standardized multilingual documentation",
+    version="0.0.1",
+    author="timerring",
+    author_email="timerring@gmail.com",
+    description="Auto Multilingual READMEs, Bridge Global Code.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/your-username/duoreadme",
@@ -37,6 +37,7 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: Documentation",
         "Topic :: Software Development :: Documentation",
         "Topic :: Text Processing :: Linguistic",

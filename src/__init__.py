@@ -4,7 +4,7 @@ DuoReadme - Multilingual README Generation Tool
 A powerful CLI tool for automatically generating project code and README into multiple languages and creating standardized multilingual documentation.
 """
 
-__version__ = "1.0.0"
+__version__ = "0.0.1"
 __author__ = "DuoReadme Team"
 
 from .core.translator import Translator

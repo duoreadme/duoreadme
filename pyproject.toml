@@ -5,14 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "duoreadme"
 dynamic = ["version"]
-description = "一个强大的CLI工具，用于将项目代码和README自动翻译成多种语言并生成规范化的多语言文档"
+description = "Auto Multilingual READMEs, Bridge Global Code."
 readme = "README.md"
 license = {text = "Apache-2.0"}
 authors = [
-    {name = "DuoReadme Team", email = "team@duoreadme.com"}
+    {name = "timerring", email = "timerring@gmail.com"}
 ]
 maintainers = [
-    {name = "DuoReadme Team", email = "team@duoreadme.com"}
+    {name = "timerring", email = "timerring@gmail.com"}
 ]
 keywords = ["readme", "translation", "multilingual", "documentation", "cli"]
 classifiers = [
@@ -25,6 +25,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Documentation",
     "Topic :: Software Development :: Documentation",
     "Topic :: Text Processing :: Linguistic",
@@ -64,11 +65,11 @@ cli = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/your-username/duoreadme"
-Documentation = "https://github.com/your-username/duoreadme/wiki"
-Repository = "https://github.com/your-username/duoreadme.git"
-"Bug Tracker" = "https://github.com/your-username/duoreadme/issues"
-"Source Code" = "https://github.com/your-username/duoreadme"
+Homepage = "https://github.com/duoreadme"
+Documentation = "https://github.com/duoreadme/duoreadme"
+Repository = "https://github.com/duoreadme/duoreadme"
+"Bug Tracker" = "https://github.com/duoreadme/duoreadme/issues"
+"Source Code" = "https://github.com/duoreadme/duoreadme"
 
 [project.scripts]
 duoreadme = "src.cli.main:main"
