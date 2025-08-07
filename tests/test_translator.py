@@ -31,25 +31,20 @@ class TestTranslator:
         languages = self.translator.get_supported_languages()
         assert isinstance(languages, list)
         assert len(languages) > 0
-        assert "中文" in languages
-        assert "English" in languages
+        assert "zh-Hans" in languages
+        assert "en" in languages
     
     @patch('src.core.translator.Path')
-    def test_read_project_content_success(self, mock_path):
+    @patch('src.core.translator.FileUtils.get_project_files')
+    def test_read_project_content_success(self, mock_get_files, mock_path):
         """Test successful project content reading"""
-        # Simulate file exists
-        mock_readme = Mock()
-        mock_readme.exists.return_value = True
-        mock_readme.read_text.return_value = "# Test README"
+        # Mock the file utils to return a README file
+        mock_readme_path = Mock()
+        mock_readme_path.name = "README.md"
+        mock_readme_path.read_text.return_value = "# Test README"
+        mock_readme_path.relative_to.return_value = "README.md"
         
-        mock_src = Mock()
-        mock_src.exists.return_value = True
-        mock_src.rglob.return_value = []
-        
-        mock_path.return_value.__truediv__.side_effect = lambda x: {
-            "README.md": mock_readme,
-            "src": mock_src
-        }[x]
+        mock_get_files.return_value = [mock_readme_path]
         
         content = self.translator._read_project_content("test_project")
         assert "=== README.md ===" in content
@@ -67,7 +62,8 @@ class TestTranslator:
         
         mock_path.return_value.__truediv__.side_effect = lambda x: {
             "README.md": mock_readme,
-            "src": mock_src
+            "src": mock_src,
+            ".gitignore": Mock(exists=lambda: False)
         }[x]
         
         content = self.translator._read_project_content("test_project")

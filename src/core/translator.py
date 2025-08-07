@@ -169,6 +169,10 @@ class Translator:
                 if readme_file.exists():
                     content = readme_file.read_text(encoding="utf-8")
                     debug(f"Successfully read README file: {readme_file}")
+                    
+                    # Remove the first line if it starts with > (language note)
+                    content = self._remove_language_note_from_content(content)
+                    
                     return content
             
             # If no README file found, return empty string
@@ -778,7 +782,34 @@ Format:
             "he": "עברית",
             "yue": "粵語"
         }
-        return language_map.get(lang_code, lang_code) 
+        return language_map.get(lang_code, lang_code)
+    
+    def _remove_language_note_from_content(self, content: str) -> str:
+        """
+        Remove language note from the beginning of content if it starts with >
+        
+        Args:
+            content: Original content
+            
+        Returns:
+            str: Content with language note removed
+        """
+        if not content:
+            return content
+        
+        lines = content.split('\n')
+        
+        # Check if the first line starts with >
+        if lines and lines[0].strip().startswith('>'):
+            debug("Removing existing language note from README content")
+            # Remove the first line and any following empty lines
+            while lines and (lines[0].strip().startswith('>') or lines[0].strip() == ''):
+                lines.pop(0)
+            
+            # Rejoin the content
+            return '\n'.join(lines)
+        
+        return content 
 
     def _build_text_translation_request(self, text: str, languages: Optional[List[str]] = None) -> TranslationRequest:
         """
