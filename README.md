@@ -223,7 +223,7 @@ Project Root Directory
 - Skip test files, sample files, temporary files
 - Retain key function definitions, class definitions, comments
 
-### 4. Batch Processing Mechanism
+#### 3.4 Batch Processing Mechanism
 When the project content exceeds 15KB, the system automatically processes in batches:
 
 ```
@@ -234,8 +234,10 @@ Content Analysis → File Grouping → Batch Translation → Result Merging
 - **Batch Translation**: Process 15KB of content per batch
 - **Result Merging**: Intelligently merge results from multiple batches
 
-### 5. Supported File Types
+### 4. Supported File Types
 - **Documentation Files**: `.md`, `.txt`, `.rst`
 - **Source Code**: `.py`, `.js`, `.java`, `.cpp`, `.c`, `.go`, `.rs`
 - **Configuration Files**: `.yaml`, `.yml`, `.json`, `.toml`
 - **Other Text**: `.sql`, `.sh`, `.bat`
+
+Requirements: Generate complete translation for each language, maintain original format and structure.
