@@ -41,6 +41,7 @@ runs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+        token: ${{ secrets.GH_TOKEN }}
         
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -84,12 +85,12 @@ runs:
             - "zh-Hans"
             - "en"
             - "ja"
-          batch_size: 5
-          timeout: 30
+          batch_size: 3
+          timeout: 60
         
         sse:
-          streaming_throttle: 1
-          timeout: 60
+          streaming_throttle: 2
+          timeout: 180
         EOF
         
     - name: Apply configuration
@@ -164,11 +165,11 @@ runs:
       if: steps.translate.outputs.success == 'true'
       shell: bash
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
         git add README.md docs/ || true
         git commit -m "${{ inputs.commit_message }}" || echo "No changes to commit"
-        git push || echo "No changes to push"
+        git push origin HEAD:${{ github.ref }} || echo "No changes to push"
         
     - name: Cleanup
       shell: bash
