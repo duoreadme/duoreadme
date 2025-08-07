@@ -1,12 +1,11 @@
-# DuoReadme 配置文件示例
-# 复制此文件为 config.yaml 并填入您的配置
+# DuoReadme Config Example
 
-# 应用配置
+# Agent APP config
 app:
   bot_app_key: "your_bot_app_key_here"
   visitor_biz_id: "your_visitor_biz_id_here"
 
-# 腾讯云配置
+# Tencent cloud config
 tencent_cloud:
   secret_id: "your_secret_id_here"
   secret_key: "your_secret_key_here"
@@ -14,7 +13,7 @@ tencent_cloud:
   service: "lke"
   api_version: "2023-11-30"
 
-# 翻译配置
+# project config
 translation:
   default_languages:
     - "zh-Hans"    # 中文 (简体)
@@ -41,9 +40,7 @@ translation:
   batch_size: 5
   timeout: 30
 
-
-
-# SSE配置
+# SSE config
 sse:
   streaming_throttle: 1
   timeout: 60 

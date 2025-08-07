@@ -5,6 +5,7 @@ Provides implementations for various CLI commands.
 """
 
 import click
+import yaml
 from pathlib import Path
 from ..core.translator import Translator
 from ..core.parser import Parser
@@ -252,6 +253,102 @@ def config_command(config, debug_mode):
         
     except Exception as e:
         click.echo(f"❌ Failed to get configuration: {e}", err=True)
+        if debug_mode:
+            import traceback
+            traceback.print_exc()
+
+
+@click.command()
+@click.argument('config_file', type=click.Path(exists=True, file_okay=True, dir_okay=False))
+@click.option('--debug', 'debug_mode', is_flag=True, help='Enable debug mode, output DEBUG level logs')
+def set_command(config_file, debug_mode):
+    """Load configuration from a YAML file and apply it to the built-in configuration"""
+    try:
+        # Set log level based on --debug parameter
+        if debug_mode:
+            enable_debug()
+            debug("Debug mode enabled")
+        
+        # Load the external configuration file
+        with open(config_file, 'r', encoding='utf-8') as f:
+            external_config = yaml.safe_load(f)
+        
+        # Create a new Config instance with built-in config
+        config_obj = Config()
+        
+        # Validate the external configuration
+        temp_config = Config()
+        temp_config._config = external_config
+        if temp_config.validate():
+            # Update the built-in configuration with external config
+            config_obj.update_builtin_config(external_config)
+            click.echo(f"✅ Configuration loaded successfully from {config_file}")
+            click.echo("Configuration has been permanently applied to the built-in configuration")
+            
+            click.echo("Configuration summary:")
+            click.echo("=" * 30)
+            
+            # Display a summary of the loaded configuration
+            all_config = config_obj.get_all()
+            for section, values in all_config.items():
+                click.echo(f"\n[{section}]")
+                for key, value in values.items():
+                    if isinstance(value, str) and len(value) > 50:
+                        # Hide sensitive information
+                        display_value = value[:10] + "..." if key in ['secret_id', 'secret_key', 'bot_app_key'] else value
+                    else:
+                        display_value = value
+                    click.echo(f"  {key}: {display_value}")
+        else:
+            click.echo(f"⚠️  Configuration loaded from {config_file} but validation failed")
+            click.echo("Please check the configuration values and try again")
+        
+    except Exception as e:
+        click.echo(f"❌ Failed to load configuration: {e}", err=True)
+        if debug_mode:
+            import traceback
+            traceback.print_exc()
+
+
+@click.command()
+@click.option('--output', '-o', type=click.Path(file_okay=True, dir_okay=False), 
+              help='Output file path (default: config.yaml)')
+@click.option('--debug', 'debug_mode', is_flag=True, help='Enable debug mode, output DEBUG level logs')
+def export_command(output, debug_mode):
+    """Export built-in configuration to YAML file"""
+    try:
+        # Set log level based on --debug parameter
+        if debug_mode:
+            enable_debug()
+            debug("Debug mode enabled")
+        
+        config_obj = Config()  # Load built-in configuration
+        debug("Exporting built-in configuration")
+        
+        # Determine output file
+        if output is None:
+            output = "config.yaml"
+        
+        # Save configuration to file
+        config_obj.save(output)
+        click.echo(f"✅ Built-in configuration exported successfully to {output}")
+        
+        # Display the exported configuration
+        click.echo("\nExported configuration:")
+        click.echo("=" * 30)
+        
+        for section, values in config_obj.get_all().items():
+            click.echo(f"\n[{section}]")
+            for key, value in values.items():
+                if isinstance(value, str) and len(value) > 50:
+                    # Hide sensitive information
+                    display_value = value[:10] + "..." if key in ['secret_id', 'secret_key', 'bot_app_key'] else value
+                else:
+                    display_value = value
+                click.echo(f"  {key}: {display_value}")
+        
+    except Exception as e:
+        click.echo(f"❌ Failed to export configuration: {e}", err=True)
         if debug_mode:
             import traceback
             traceback.print_exc()
