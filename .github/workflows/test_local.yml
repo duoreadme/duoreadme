@@ -2,19 +2,6 @@ name: Test Local DuoReadme
 
 on:
   workflow_dispatch:
-    inputs:
-      languages:
-        description: 'Languages to translate (comma-separated, e.g., zh-Hans,en,ja)'
-        required: false
-        default: 'zh-Hans,en,ja'
-      translation_mode:
-        description: 'Translation mode - gen (full project) or trans (README only)'
-        required: false
-        default: 'trans'
-      debug:
-        description: 'Enable debug mode for detailed logging'
-        required: false
-        default: 'true'
 
 jobs:
   test-local:
@@ -34,12 +21,6 @@ jobs:
       - name: Install DuoReadme
         run: |
           pip install duoreadme
-          
-      - name: Configure environment
-        run: |
-          echo "Languages: ${{ github.event.inputs.languages }}"
-          echo "Translation mode: ${{ github.event.inputs.translation_mode }}"
-          echo "Debug mode: ${{ github.event.inputs.debug }}"
           
       - name: Create test config
         run: |
@@ -85,11 +66,7 @@ jobs:
           set +e
           
           # Prepare command
-          CMD="duoreadme ${{ github.event.inputs.translation_mode }} --languages ${{ github.event.inputs.languages }}"
-          
-          if [ "${{ github.event.inputs.debug }}" = "true" ]; then
-            CMD="$CMD --debug"
-          fi
+          CMD="duoreadme trans --languages zh-Hans,en,ja"
           
           CMD="$CMD --verbose"
           
@@ -101,7 +78,7 @@ jobs:
           # Capture results
           if [ $? -eq 0 ]; then
             echo "success=true" >> $GITHUB_OUTPUT
-            echo "languages_processed=${{ github.event.inputs.languages }}" >> $GITHUB_OUTPUT
+            echo "languages_processed=zh-Hans,en,ja" >> $GITHUB_OUTPUT
             
             # List translated files
             TRANSLATED_FILES=""

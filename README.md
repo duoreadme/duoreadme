@@ -285,7 +285,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Translate README
-        uses: duoreadme/duoreadme@v0.1.0
+        uses: duoreadme/duoreadme@v0.1.1
         env:
           TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENTCLOUD_SECRET_ID }}
           TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENTCLOUD_SECRET_KEY }}
