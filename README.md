@@ -285,7 +285,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Translate README
-        uses: timerring/duoreadme@v1
+        uses: duoreadme/duoreadme@v0.1.0
         env:
           TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENTCLOUD_SECRET_ID }}
           TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENTCLOUD_SECRET_KEY }}
@@ -310,7 +310,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Translate with custom settings
-        uses: timerring/duoreadme-action@v1
+        uses: duoreadme/duoreadme@v0.1.0
         with:
           languages: 'zh-Hans,en,ja' # You can specify multiple languages, separated by commas
           translation_mode: 'trans' # You can use 'gen' or 'trans' options.
