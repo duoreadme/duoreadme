@@ -1,0 +1,160 @@
+name: 'DuoReadme'
+description: 'Automatically translate README files to multiple languages using DuoReadme'
+author: 'https://github.com/timerring'
+branding:
+  icon: 'globe'
+  color: 'blue'
+
+inputs:
+  languages:
+    description: 'Languages to translate (comma-separated, e.g., zh-Hans,en,ja)'
+    required: false
+    default: 'zh-Hans,en,ja'
+  translation_mode:
+    description: 'Translation mode - gen (full project) or trans (README only)'
+    required: false
+    default: 'trans'
+  commit_message:
+    description: 'Custom commit message for translation changes'
+    required: false
+    default: 'DuoReadme Auto-translate'
+  debug:
+    description: 'Enable debug mode for detailed logging'
+    required: false
+    default: 'false'
+
+outputs:
+  translated_files:
+    description: 'List of translated files generated'
+    value: ${{ steps.translate.outputs.translated_files }}
+  languages_processed:
+    description: 'Languages that were processed'
+    value: ${{ steps.translate.outputs.languages_processed }}
+  success:
+    description: 'Whether the translation was successful'
+    value: ${{ steps.translate.outputs.success }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install DuoReadme
+      shell: bash
+      run: |
+        pip install duoreadme
+        
+    - name: Configure environment
+      shell: bash
+      run: |
+        echo "Languages: ${{ inputs.languages }}"
+        echo "Translation mode: ${{ inputs.translation_mode }}"
+        echo "Debug mode: ${{ inputs.debug }}"
+        
+    - name: Create default config
+      shell: bash
+      run: |
+        echo "Creating default config with environment variables..."
+        cat > custom_config.yaml << EOF
+        app:
+          bot_app_key: "${{ env.DUOREADME_BOT_APP_KEY }}"
+          visitor_biz_id: "github-action"
+        
+        tencent_cloud:
+          secret_id: "${{ env.TENCENTCLOUD_SECRET_ID }}"
+          secret_key: "${{ env.TENCENTCLOUD_SECRET_KEY }}"
+          region: "ap-beijing"
+          service: "lke"
+          api_version: "2023-11-30"
+        
+        translation:
+          default_languages:
+            - "zh-Hans"
+            - "en"
+            - "ja"
+          batch_size: 5
+          timeout: 30
+        
+        sse:
+          streaming_throttle: 1
+          timeout: 60
+        EOF
+        
+    - name: Apply configuration
+      shell: bash
+      run: |
+        duoreadme set custom_config.yaml
+        
+    - name: Run translation
+      id: translate
+      shell: bash
+      run: |
+        set +e
+        
+        # Prepare command
+        CMD="duoreadme ${{ inputs.translation_mode }} --languages ${{ inputs.languages }}"
+        
+        if [ "${{ inputs.debug }}" = "true" ]; then
+          CMD="$CMD --debug"
+        fi
+        
+        CMD="$CMD --verbose"
+        
+        echo "Running: $CMD"
+        
+        # Execute translation
+        $CMD
+        
+        # Capture results
+        if [ $? -eq 0 ]; then
+          echo "success=true" >> $GITHUB_OUTPUT
+          echo "languages_processed=${{ inputs.languages }}" >> $GITHUB_OUTPUT
+          
+          # List translated files
+          TRANSLATED_FILES=""
+          if [ -f "README.md" ]; then
+            TRANSLATED_FILES="README.md"
+          fi
+          
+          if [ -d "docs" ]; then
+            for file in docs/README.*.md; do
+              if [ -f "$file" ]; then
+                if [ -n "$TRANSLATED_FILES" ]; then
+                  TRANSLATED_FILES="$TRANSLATED_FILES,$file"
+                else
+                  TRANSLATED_FILES="$file"
+                fi
+              fi
+            done
+          fi
+          
+          echo "translated_files=$TRANSLATED_FILES" >> $GITHUB_OUTPUT
+          echo "Translation completed successfully"
+        else
+          echo "success=false" >> $GITHUB_OUTPUT
+          echo "Translation failed"
+          exit 1
+        fi
+        
+    - name: Commit changes
+      if: steps.translate.outputs.success == 'true'
+      shell: bash
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add README.md docs/ || true
+        git commit -m "${{ inputs.commit_message }}" || echo "No changes to commit"
+        git push || echo "No changes to push"
+        
+    - name: Cleanup
+      shell: bash
+      run: |
+        rm -f custom_config.yaml 
