@@ -1,17 +1,32 @@
 # DuoReadme Config Example
 
-# Agent APP config
+# Translation provider: "siliconflow" (default) or "tencent"
+provider: "siliconflow"
+
+# Agent APP config (for Tencent provider)
 app:
   bot_app_key: "your_bot_app_key_here" # In your [application page](https://lke.cloud.tencent.com/lke#/app/home), select `调用` then find it in `appkey`.
   visitor_biz_id: "your_visitor_biz_id_here"
 
-# Tencent cloud config
+# Tencent cloud config (for Tencent provider)
 tencent_cloud:
   secret_id: "your_secret_id_here" # Apply in [Tencent Cloud Console](https://console.cloud.tencent.com/cam/capi), select `新建密钥`。
   secret_key: "your_secret_key_here" # Apply in [Tencent Cloud Console](https://console.cloud.tencent.com/cam/capi), select `新建密钥`。
   region: "ap-beijing"
   service: "lke"
   api_version: "2023-11-30"
+
+# SiliconFlow config (for SiliconFlow provider)
+siliconflow:
+  api_key: "your_siliconflow_api_key_here" # Get from https://cloud.siliconflow.cn/account/ak
+  model: "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B" # Available: DeepSeek-R1, DeepSeek-V2.5, Qwen2.5, Llama-3.1, etc.
+  timeout: 900
+  max_tokens: 8192
+  temperature: 0.1
+  top_p: 0.7
+  top_k: 50
+  frequency_penalty: 1.0
+  max_workers: 10
 
 # project config
 translation:

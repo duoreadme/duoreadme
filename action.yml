@@ -14,6 +14,10 @@ inputs:
     description: 'Translation mode - gen (full project) or trans (README only)'
     required: false
     default: 'trans'
+  provider:
+    description: 'Translation provider - siliconflow (default) or tencent'
+    required: false
+    default: 'siliconflow'
   commit_message:
     description: 'Custom commit message for translation changes'
     required: false
@@ -58,6 +62,7 @@ runs:
       run: |
         echo "Languages: ${{ inputs.languages }}"
         echo "Translation mode: ${{ inputs.translation_mode }}"
+        echo "Provider: ${{ inputs.provider }}"
         echo "Debug mode: ${{ inputs.debug }}"
         
     - name: Create default config
@@ -66,9 +71,12 @@ runs:
         TENCENTCLOUD_SECRET_ID: ${{ env.TENCENTCLOUD_SECRET_ID }}
         TENCENTCLOUD_SECRET_KEY: ${{ env.TENCENTCLOUD_SECRET_KEY }}
         DUOREADME_BOT_APP_KEY: ${{ env.DUOREADME_BOT_APP_KEY }}
+        SILICONFLOW_API_KEY: ${{ env.SILICONFLOW_API_KEY }}
       run: |
         echo "Creating default config with environment variables..."
         cat > custom_config.yaml << EOF
+        provider: "${{ inputs.provider }}"
+        
         app:
           bot_app_key: "$DUOREADME_BOT_APP_KEY"
           visitor_biz_id: "github-action"
@@ -79,6 +87,12 @@ runs:
           region: "ap-beijing"
           service: "lke"
           api_version: "2023-11-30"
+        
+        siliconflow:
+          api_key: "$SILICONFLOW_API_KEY"
+          model: "Qwen/Qwen2.5-7B-Instruct"
+          timeout: 120
+          max_tokens: 8192
         
         translation:
           default_languages:
@@ -99,6 +113,7 @@ runs:
         TENCENTCLOUD_SECRET_ID: ${{ env.TENCENTCLOUD_SECRET_ID }}
         TENCENTCLOUD_SECRET_KEY: ${{ env.TENCENTCLOUD_SECRET_KEY }}
         DUOREADME_BOT_APP_KEY: ${{ env.DUOREADME_BOT_APP_KEY }}
+        SILICONFLOW_API_KEY: ${{ env.SILICONFLOW_API_KEY }}
       run: |
         duoreadme set custom_config.yaml
         
@@ -109,11 +124,12 @@ runs:
         TENCENTCLOUD_SECRET_ID: ${{ env.TENCENTCLOUD_SECRET_ID }}
         TENCENTCLOUD_SECRET_KEY: ${{ env.TENCENTCLOUD_SECRET_KEY }}
         DUOREADME_BOT_APP_KEY: ${{ env.DUOREADME_BOT_APP_KEY }}
+        SILICONFLOW_API_KEY: ${{ env.SILICONFLOW_API_KEY }}
       run: |
         set +e
         
         # Prepare command
-        CMD="duoreadme ${{ inputs.translation_mode }} --languages ${{ inputs.languages }}"
+        CMD="duoreadme ${{ inputs.translation_mode }} --languages ${{ inputs.languages }} --provider ${{ inputs.provider }}"
         
         if [ "${{ inputs.debug }}" = "true" ]; then
           CMD="$CMD --debug"
@@ -122,10 +138,15 @@ runs:
         CMD="$CMD --verbose"
         
         echo "Running: $CMD"
+        echo "Provider: ${{ inputs.provider }}"
         echo "Environment variables:"
-        echo "TENCENTCLOUD_SECRET_ID: ${TENCENTCLOUD_SECRET_ID:0:10}..."
-        echo "TENCENTCLOUD_SECRET_KEY: ${TENCENTCLOUD_SECRET_KEY:0:10}..."
-        echo "DUOREADME_BOT_APP_KEY: ${DUOREADME_BOT_APP_KEY:0:10}..."
+        if [ "${{ inputs.provider }}" = "tencent" ]; then
+          echo "TENCENTCLOUD_SECRET_ID: ${TENCENTCLOUD_SECRET_ID:0:10}..."
+          echo "TENCENTCLOUD_SECRET_KEY: ${TENCENTCLOUD_SECRET_KEY:0:10}..."
+          echo "DUOREADME_BOT_APP_KEY: ${DUOREADME_BOT_APP_KEY:0:10}..."
+        else
+          echo "SILICONFLOW_API_KEY: ${SILICONFLOW_API_KEY:0:10}..."
+        fi
         
         # Execute translation
         $CMD

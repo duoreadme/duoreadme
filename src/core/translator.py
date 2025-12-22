@@ -9,8 +9,7 @@ import json
 import re
 from pathlib import Path
 from typing import Dict, List, Optional, Any
-from ..services.tencent_cloud import TencentCloudService
-from ..services.sse_client import SSEClient
+from ..services.providers import get_provider, TranslationProvider
 from ..utils.config import Config
 from ..utils.file_utils import FileUtils
 from ..models.types import TranslationRequest, TranslationResponse
@@ -20,17 +19,23 @@ from ..utils.logger import debug, info, warning, error
 class Translator:
     """Generator class, responsible for project content generation"""
     
-    def __init__(self, config: Optional[Config] = None):
+    def __init__(self, config: Optional[Config] = None, provider: Optional[str] = None):
         """
         Initialize translator
         
         Args:
             config: Configuration object, if None then use default configuration
+            provider: Provider name ("tencent" or "siliconflow"), if None use config default
         """
         self.config = config or Config()
-        self.tencent_service = TencentCloudService(self.config)
-        self.sse_client = SSEClient(self.config)
+        
+        # Override provider if specified
+        if provider:
+            self.config.set("provider", provider)
+        
+        self.provider: TranslationProvider = get_provider(self.config)
         self.file_utils = FileUtils()
+        info(f"Using translation provider: {self.provider.name}")
         
     def translate_project(self, project_path: str, languages: Optional[List[str]] = None) -> TranslationResponse:
         """
@@ -579,11 +584,16 @@ Format:
         Returns:
             TranslationResponse: Generation response object
         """
-        print("Sending generation request...")
+        print(f"Sending generation request via {self.provider.name}...")
         
         try:
-            # Use SSE client to send request
-            response_text = self.sse_client.send_request(request)
+            # Use provider to translate
+            response_text = self.provider.translate(
+                content=request.content,
+                languages=request.languages,
+                mode=request.additional_params.get("mode", "gen") if request.additional_params else "gen",
+                workflow_variables=request.additional_params.get("workflow_variables") if request.additional_params else None
+            )
             
             return TranslationResponse(
                 success=True,
@@ -845,32 +855,11 @@ Format:
             "language": languages_str
         }
         
-        # Build concise prompt
-        prompt = f"""Please translate the following text into {languages_str}, format:
-
-Original text: {text}
-
-Requirements: Generate complete translation for each language, maintain original format and structure.
-
-Format:
-"""
-        
-        # Add concise format instructions for each language
-        for lang in languages:
-            lang_name = self.get_language_name(lang)
-            if lang == "ja":
-                prompt += f"### 日本語\n[Translated content]\n\n"
-            elif lang == "zh-Hans":
-                prompt += f"### 中文\n[Translated content]\n\n"
-            elif lang == "en":
-                prompt += f"### English\n[Translated content]\n\n"
-            else:
-                prompt += f"### {lang_name}\n[Translated content]\n\n"
-        
+        # Pass raw text content - let the provider handle prompt building
         return TranslationRequest(
-            content=prompt,
+            content=text,
             languages=languages,
             bot_app_key=self.config.get("app.bot_app_key"),
             visitor_biz_id=self.config.get("app.visitor_biz_id"),
-            additional_params={"workflow_variables": workflow_variables}
+            additional_params={"workflow_variables": workflow_variables, "mode": "trans"}
         ) 

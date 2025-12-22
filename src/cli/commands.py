@@ -17,10 +17,11 @@ from ..utils.logger import enable_debug, info, debug
 @click.command()
 @click.option('--project-path', default='.', help='Project path, defaults to current directory')
 @click.option('--languages', help='Languages to generate, comma-separated, e.g.: zh-Hans,en,ja')
+@click.option('--provider', type=click.Choice(['tencent', 'siliconflow']), help='Translation provider to use')
 @click.option('--config', help='Configuration file path')
 @click.option('--verbose', is_flag=True, help='Show detailed output')
 @click.option('--debug', 'debug_mode', is_flag=True, help='Enable debug mode, output DEBUG level logs')
-def gen_command(project_path, languages, config, verbose, debug_mode):
+def gen_command(project_path, languages, provider, config, verbose, debug_mode):
     """Generate multi-language README"""
     try:
         # Set log level based on --debug parameter
@@ -38,7 +39,7 @@ def gen_command(project_path, languages, config, verbose, debug_mode):
             return
         
         # Create core components
-        translator = Translator(config_obj)
+        translator = Translator(config_obj, provider=provider)
         parser_obj = Parser()
         generator = Generator()
         debug("Core components initialized")
@@ -116,10 +117,11 @@ def run_translation_workflow(
 @click.command()
 @click.option('--project-path', default='.', help='Project path, defaults to current directory')
 @click.option('--languages', help='Languages to translate, comma-separated, e.g.: zh-Hans,en,ja')
+@click.option('--provider', type=click.Choice(['tencent', 'siliconflow']), help='Translation provider to use')
 @click.option('--config', help='Configuration file path')
 @click.option('--verbose', is_flag=True, help='Show detailed output')
 @click.option('--debug', 'debug_mode', is_flag=True, help='Enable debug mode, output DEBUG level logs')
-def trans_command(project_path, languages, config, verbose, debug_mode):
+def trans_command(project_path, languages, provider, config, verbose, debug_mode):
     """Pure text translation function - translate README file in project root directory"""
     try:
         # Set log level based on --debug parameter
@@ -137,7 +139,7 @@ def trans_command(project_path, languages, config, verbose, debug_mode):
             return
         
         # Create core components
-        translator = Translator(config_obj)
+        translator = Translator(config_obj, provider=provider)
         parser_obj = Parser()
         generator = Generator()
         debug("Core components initialized")

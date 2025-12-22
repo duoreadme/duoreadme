@@ -1,4 +1,4 @@
-> Homepage is English README. You can view the [简体中文](./docs/README.zh.md) | [日本語](./docs/README.ja.md) versions.
+> Homepage is English README. You can view the [简体中文](./docs/README.zh.md) | [한국어](./docs/README.ko.md) | [日本語](./docs/README.ja.md) | [Français](./docs/README.fr.md) versions.
 
 <div align="center">
   <picture>
@@ -250,5 +250,3 @@ Content Analysis → File Grouping → Batch Translation → Result Merging
 - **Source Code**: `.py`, `.js`, `.java`, `.cpp`, `.c`, `.go`, `.rs`
 - **Configuration Files**: `.yaml`, `.yml`, `.json`, `.toml`
 - **Other Text**: `.sql`, `.sh`, `.bat`
-
-Requirements: Generate complete translation for each language, maintain original format and structure.

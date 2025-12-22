@@ -44,24 +44,68 @@ class JSONExtractor:
         return None
     
     @staticmethod
+    def _clean_json_text(json_text: str) -> str:
+        """Clean JSON text by handling special characters"""
+        # Remove control characters except \n and \t
+        # Replace \r with empty string
+        json_text = json_text.replace('\r', '')
+        # Remove other control characters
+        json_text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]', '', json_text)
+        return json_text
+    
+    @staticmethod
     def _extract_json_code_block(response_text: str) -> Optional[Dict[str, Any]]:
         """Extract JSON from code block"""
-        try:
-            # Find ```json ... ``` format
-            json_match = re.search(r'```json\s*(.*?)\s*```', response_text, re.DOTALL)
-            if json_match:
-                json_text = json_match.group(1).strip()
-                return json.loads(json_text)
+        # Find ```json marker
+        json_start_match = re.search(r'```json\s*', response_text, re.DOTALL)
+        if json_start_match:
+            # Start from after ```json
+            content_start = json_start_match.end()
+            # Find the JSON object by brace matching (handles nested ``` in content)
+            remaining = response_text[content_start:]
+            
+            # Find the first { which starts the JSON
+            brace_start = remaining.find('{')
+            if brace_start != -1:
+                # Use brace matching to find complete JSON
+                brace_count = 0
+                in_string = False
+                escape_next = False
+                json_end = -1
                 
-            # Find ``` ... ``` format (might be JSON)
-            code_match = re.search(r'```\s*(.*?)\s*```', response_text, re.DOTALL)
-            if code_match:
-                json_text = code_match.group(1).strip()
-                # Check if it looks like JSON
-                if json_text.startswith('{') and json_text.endswith('}'):
-                    return json.loads(json_text)
-        except (json.JSONDecodeError, AttributeError):
-            pass
+                for i in range(brace_start, len(remaining)):
+                    char = remaining[i]
+                    
+                    if escape_next:
+                        escape_next = False
+                        continue
+                    
+                    if char == '\\':
+                        escape_next = True
+                        continue
+                    
+                    if char == '"' and not escape_next:
+                        in_string = not in_string
+                        continue
+                    
+                    if not in_string:
+                        if char == '{':
+                            brace_count += 1
+                        elif char == '}':
+                            brace_count -= 1
+                            if brace_count == 0:
+                                json_end = i + 1
+                                break
+                
+                if json_end != -1:
+                    json_text = remaining[brace_start:json_end]
+                    json_text = JSONExtractor._clean_json_text(json_text)
+                    try:
+                        return json.loads(json_text)
+                    except json.JSONDecodeError as e:
+                        print(f"[DEBUG] JSON parse error: {e}")
+                        print(f"[DEBUG] JSON text length: {len(json_text)}")
+        
         return None
     
     @staticmethod
@@ -87,8 +131,7 @@ class JSONExtractor:
             
             if end != -1:
                 json_text = response_text[start:end]
-                # Clean control characters
-                json_text = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', json_text)
+                json_text = JSONExtractor._clean_json_text(json_text)
                 return json.loads(json_text)
         except (json.JSONDecodeError, IndexError):
             pass

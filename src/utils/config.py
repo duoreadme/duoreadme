@@ -68,6 +68,7 @@ class Config:
     def _get_fallback_config(self) -> Dict[str, Any]:
         """Get fallback configuration if built-in config cannot be loaded"""
         return {
+            "provider": "siliconflow",
             "app": {
                 "bot_app_key": "",
                 "visitor_biz_id": ""
@@ -78,6 +79,17 @@ class Config:
                 "region": "ap-beijing",
                 "service": "lke",
                 "api_version": "2023-11-30"
+            },
+            "siliconflow": {
+                "api_key": "",
+                "model": "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B",
+                "timeout": 900,
+                "max_tokens": 8192,
+                "temperature": 0.1,
+                "top_p": 0.7,
+                "top_k": 50,
+                "frequency_penalty": 1.0,
+                "max_workers": 10
             },
             "translation": {
                 "default_languages": [
@@ -104,11 +116,17 @@ class Config:
     def _load_from_env(self):
         """Load configuration from environment variables"""
         env_mappings = {
+            # Provider selection
+            "DUOREADME_PROVIDER": ("provider",),
+            # Tencent Cloud config
             "DUOREADME_BOT_APP_KEY": ("app", "bot_app_key"),
             "DUOREADME_VISITOR_BIZ_ID": ("app", "visitor_biz_id"),
             "TENCENTCLOUD_SECRET_ID": ("tencent_cloud", "secret_id"),
             "TENCENTCLOUD_SECRET_KEY": ("tencent_cloud", "secret_key"),
             "TENCENTCLOUD_REGION": ("tencent_cloud", "region"),
+            # SiliconFlow config
+            "SILICONFLOW_API_KEY": ("siliconflow", "api_key"),
+            "SILICONFLOW_MODEL": ("siliconflow", "model"),
         }
         
         for env_var, config_path in env_mappings.items():
